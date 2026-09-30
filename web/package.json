@@ -7,14 +7,19 @@
     "preview": "vite preview --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prepare:ocr": "node scripts/prepare-ocr.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.4",
     "lucide-react": "^0.552.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "vaul": "^1.1.2"
+    "vaul": "^1.1.2",
+    "tesseract.js": "6.0.1",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -25,6 +30,7 @@
     "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
     "vite": "^6.4.0",
-    "vitest": "^3.1.2"
+    "vitest": "^3.1.2",
+    "@playwright/test": "^1.63.0"
   }
 }
