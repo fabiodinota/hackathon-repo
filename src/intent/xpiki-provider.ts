@@ -125,7 +125,8 @@ export class XpikiIntentProvider implements IntentProvider {
             },
             { role: "user", content },
           ],
-          temperature: 0,
+          reasoning: { effort: "none" },
+          store: false,
           max_output_tokens: 512,
           text: {
             format: {
@@ -158,15 +159,29 @@ export class XpikiIntentProvider implements IntentProvider {
       reader.releaseLock();
     }
     const data = JSON.parse(Buffer.concat(chunks).toString()) as {
-      output_text?: string;
-      output?: Array<{ content?: Array<{ text?: string }> }>;
+      status?: string;
+      error?: unknown;
+      output?: Array<{
+        type?: string;
+        role?: string;
+        content?: Array<{ type?: string; text?: string }>;
+      }>;
     };
-    const text =
-      data.output_text ??
-      data.output
-        ?.flatMap((item) => item.content ?? [])
-        .map((part) => part.text ?? "")
-        .join("");
+    if (data.status !== "completed" || data.error) return uncertainResult();
+    const messages = data.output?.filter(
+      (item) => item.type === "message" && item.role === "assistant",
+    );
+    if (
+      messages?.some((item) =>
+        item.content?.some((part) => part.type === "refusal"),
+      )
+    )
+      return uncertainResult();
+    const text = messages
+      ?.flatMap((item) => item.content ?? [])
+      .filter((part) => part.type === "output_text")
+      .map((part) => part.text ?? "")
+      .join("");
     return validateIntent(text, this.config.threshold);
   }
 }

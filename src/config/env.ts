@@ -54,7 +54,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     xpiki: {
       apiKey: env.XPIKI_API_KEY ?? "",
       baseUrl: env.XPIKI_BASE_URL ?? "https://api.xpiki.com/v1",
-      model: env.XPIKI_MODEL ?? "gpt-6-astra",
+      model: env.XPIKI_MODEL ?? "gpt-6-luna",
     },
   };
 }
