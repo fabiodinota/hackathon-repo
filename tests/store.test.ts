@@ -28,6 +28,14 @@ it("does not restore deleted results after resume or newer work", () => {
   store.delete(s.sessionId);
   expect(store.get(s.sessionId)).toBeNull();
 });
+it("keeps an existing result while paused and blocks new work", () => {
+  const store = new EphemeralIntentStore();
+  const s = store.start();
+  store.finish(store.begin(s.sessionId), valid);
+  store.pause(s.sessionId);
+  expect(store.get(s.sessionId)).toEqual(valid);
+  expect(() => store.begin(s.sessionId)).toThrow("SESSION_PAUSED");
+});
 it("rejects overlapping analysis and cross-session tokens", () => {
   const store = new EphemeralIntentStore();
   const a = store.start(),
@@ -38,4 +46,13 @@ it("rejects overlapping analysis and cross-session tokens", () => {
   store.begin(a.sessionId);
   expect(() => store.begin(a.sessionId)).toThrow("BUSY");
   store.dispose();
+});
+it("rejects work authorized before a clear but begun afterward", () => {
+  const store = new EphemeralIntentStore();
+  const session = store.start();
+  const generation = store.authorize(session.sessionId, session.sessionToken);
+  store.delete(session.sessionId);
+  expect(() => store.begin(session.sessionId, generation)).toThrow(
+    "STALE_REQUEST",
+  );
 });

@@ -3,13 +3,21 @@ import { PipelineError } from "../errors/pipeline-errors.js";
 import { SessionError } from "../session/store.js";
 import { intentRoutes, type IntentRouteDependencies } from "./intent-routes.js";
 import { bearer, HttpError, json, matchesToken, readJson } from "./http.js";
+import { loadCatalogue } from "../catalogue/loader.js";
+import { CatalogueMatcher } from "../catalogue/matcher.js";
+import type { KbcService, ServiceMatcher } from "../catalogue/types.js";
 export type AppOptions = IntentRouteDependencies & {
   origins: string[];
   bootstrapToken: string;
   port: number;
+  catalogue?: readonly KbcService[];
+  matcher?: ServiceMatcher;
+  now?: () => number;
 };
 export function createApp(options: AppOptions) {
   const { store } = options;
+  const catalogue = options.catalogue ?? loadCatalogue();
+  const matcher = options.matcher ?? new CatalogueMatcher({ now: options.now });
   const authorize = (request: Request) => {
     const id = request.headers.get("x-session-id") ?? "";
     store.authorize(id, bearer(request));
@@ -108,9 +116,36 @@ export function createApp(options: AppOptions) {
       },
       { parse: "none" },
     )
-    .get("/api/context", ({ request }) =>
-      json({ intent: store.get(authorize(request)) }),
+    .post(
+      "/api/context/pause",
+      ({ request }) => {
+        const id = authorize(request);
+        store.pause(id);
+        return json({ paused: store.isPaused(id) });
+      },
+      { parse: "none" },
     )
+    .get("/api/context", ({ request }) => {
+      const id = authorize(request);
+      const context = store.getContext(id);
+      return json({
+        sessionId: id,
+        intent: context?.intent ?? null,
+        expiresAt: context?.expiresAt ?? null,
+        paused: store.isPaused(id),
+      });
+    })
+    .get("/api/services/recommendation", ({ request }) => {
+      const id = authorize(request);
+      if (store.isPaused(id))
+        return json({ recommendation: null, alternatives: [], matched: false });
+      const intent = store.get(id);
+      return json(
+        intent
+          ? matcher.match(intent, catalogue)
+          : { recommendation: null, alternatives: [], matched: false },
+      );
+    })
     .delete(
       "/api/context",
       ({ request }) => {

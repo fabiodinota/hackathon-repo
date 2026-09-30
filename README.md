@@ -1,6 +1,6 @@
 # KBC Assist POC
 
-Backend for **items 6–7**: build short-lived sanitized context, interpret intent through Vertex AI, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, catalogue matching and notifications are separate team responsibilities.
+Backend for **items 6–9**: build short-lived sanitized context, interpret intent through Vertex AI, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, notifications are separate team responsibilities.
 
 ## Install and run
 
@@ -34,7 +34,7 @@ Read [the API contract](docs/integration.md). Session startup requires the local
 | POST /api/session/start  | Require pairing token and consent; issue session credentials |
 | POST /api/intent/analyze | Accept already-sanitized frames; return only IntentResult    |
 | GET /api/context         | Return the current intent or null                            |
-| POST /api/session/pause  | Abort pending work, clear results, reject new analysis       |
+| POST /api/session/pause  | Abort pending work, retain context, reject new analysis       |
 | POST /api/session/resume | Allow processing again in an unexpired session               |
 | DELETE /api/context      | Clear results and invalidate pending work                    |
 | POST /api/session/stop   | Revoke and remove the session                                |
@@ -69,3 +69,15 @@ Tests mock Vertex and credentials. The smoke test starts the actual Bun/Elysia s
 Items 1–5 were absent when this backend was built. The adapter boundary is documented and tested with mocks; live OCR/masking and the complete UI flow remain to be integrated. The separate Interdict repository was inspected read-only and was not changed or copied.
 
 Live Vertex availability, IAM, latency and recognition are unverified without a configured Google project. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.
+
+## Context and recommendations (components 8–9)
+
+The Map-backed ContextStore retains a projection of component 7's validated intent vocabulary. Default TTL is five minutes; reads and periodic cleanup remove expired data. Returned values are copies. No screenshots, raw OCR, prompts, raw model responses or arbitrary personal text are retained. Recommendations are computed on read rather than stored.
+
+GET /api/context preserves the existing nested IntentResult or null response, adding sessionId, expiresAt and paused. GET /api/services/recommendation returns recommendation, alternatives and matched. POST /api/context/pause aliases session pause. All routes reuse the session token, allowed Origin and loopback protection.
+
+Pause retains current context while rejecting new processing and suppressing recommendations. Resume uses POST /api/session/resume. Delete invalidates in-flight processing and clears context. Session credentials expire five minutes after session creation and are not renewed; context expiry cannot exceed session expiry.
+
+The catalogue loader validates kbc-services.json once at server startup, rejects duplicate IDs and unsafe paths, and returns deeply frozen data. This is demo data based on KBC categories, not an official or live KBC integration. ServiceMatcher ranks exact intent matches first, then keyword evidence from reviewed signals; ties preserve catalogue order. It returns one primary and up to two alternatives. Uncertain, missing, expired or below-threshold intent yields no recommendation. Reasons use fixed neutral wording, without eligibility decisions or transactions. Opening a local service route remains a manual frontend action.
+
+ContextStore and ServiceMatcher are injectable interfaces; the authenticated session adapter owns async processing leases and cancellation. Direct ContextStore.set callers must capture createdAt before beginning asynchronous work; stale writes at or before deletion are discarded. The production route uses session generation checks as well. The clock, catalogue and matcher can be injected for testing. The current intent vocabulary supports only home_purchase_planning; new scenarios need reviewed signals and tests.

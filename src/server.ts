@@ -4,6 +4,8 @@ import { loadConfig } from "./config/env.js";
 import { IntentService } from "./intent/service.js";
 import { VertexIntentProvider } from "./intent/vertex-provider.js";
 import { EphemeralIntentStore } from "./session/store.js";
+import { loadCatalogue } from "./catalogue/loader.js";
+import { CatalogueMatcher } from "./catalogue/matcher.js";
 const config = loadConfig();
 const provider = new VertexIntentProvider({
   ...config.vertex,
@@ -18,6 +20,11 @@ const app = createApp({
   origins: config.origins,
   bootstrapToken: config.sessionToken,
   port: config.port,
+  catalogue: loadCatalogue(),
+  matcher: new CatalogueMatcher({
+    threshold: config.threshold,
+    intentTtlMs: config.ttlMs,
+  }),
 });
 const timer = setInterval(() => store.cleanup(), 10000);
 timer.unref();

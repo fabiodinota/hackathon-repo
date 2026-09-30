@@ -14,9 +14,9 @@ Detection spans index UTF-8 bytes, not JavaScript UTF-16 characters. Item 5 must
 
 ## Session flow
 
-1. Obtain explicit UI consent. POST /api/session/start with JSON containing consent:true, an allowlisted Origin and Authorization: Bearer LOCAL_PAIRING_TOKEN.
+1. Obtain explicit UI consent. POST /api/session/start with JSON containing consent:true, an allowlisted Origin and Authorization: Bearer LOCAL_PAIRING_TOKEN. LOCAL_PAIRING_TOKEN is the SESSION_TOKEN configured in backend .env.
 2. Keep returned sessionId, sessionToken and expiresAt in browser memory. Sessions expire five minutes after creation; there is no automatic renewal.
-3. Subsequent calls require Authorization: Bearer SESSION_TOKEN, X-Session-Id and an allowlisted Origin. Trusted CLI clients must also explicitly provide Origin. The body sessionId must match the header.
+3. Subsequent calls require Authorization: Bearer <returned sessionToken>, X-Session-Id: <returned sessionId> and an allowlisted Origin. Use the credentials returned by session startup, not the pairing token from .env. Trusted CLI clients must also explicitly provide Origin. The body sessionId must match the header.
 4. POST /api/intent/analyze with sanitized input below; poll GET /api/context for the current intent. Match and notify only for a non-null, certain result meeting the product confidence threshold.
 5. Stop/pause frontend capture when calling its corresponding control route. Delete must clear frontend history too. Backend pause/delete/stop aborts pending work and invalidates late results.
 
@@ -59,7 +59,7 @@ type IntentResult = {
 
 The reviewed vocabulary in src/intent/vocabulary.ts restricts intent and signals. Unexpected fields are stripped; invalid required values fail closed. Low confidence forces null intent and empty signals. The backend assigns generatedAt. Confidence is a demo heuristic, not a probability or financial decision.
 
-GET /api/context returns an object with intent equal to IntentResult or null. Error responses contain only an error code: invalid/empty input 400; authentication 401; origin/host 403; paused/busy 409; expired 410; oversized body/context 413. Only one analysis runs per session. Provider failure returns HTTP 200 with uncertainty and clears earlier suggestions. Raw provider errors never reach clients.
+GET /api/context returns an object with intent equal to IntentResult or null. Error responses contain only an error code: invalid/empty input 400; authentication 401; origin/host 403; paused/busy/stale request 409; expired 410; oversized body/context 413. Uploads authorized before a delete or pause are rejected with STALE_REQUEST (409), even after resume. Discard their captured frames; any new analysis must use fresh context. Only one analysis runs per session. Provider failure returns HTTP 200 with uncertainty and clears earlier suggestions. Raw provider errors never reach clients.
 
 ## Composition
 
