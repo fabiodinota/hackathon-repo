@@ -12,11 +12,12 @@ type Props = {
   onWhy: () => void;
   onChecklist: () => void;
 };
-const statusLabels = {
+const statusLabels: Record<AssistState["status"], string> = {
   paused: "Assist paused",
   waiting: "Waiting for context",
   ready: "Suggestion ready",
   empty: "No suggestion available yet",
+  error: "Unable to load suggestions",
 };
 
 export function ContextView({

@@ -1,10 +1,8 @@
-export type AssistContext = {
-  intent: string
-  confidence: 'high' | 'medium' | 'low'
-  signals: string[]
-  receivedAt: string
-  expiresAt: string
-}
+import type { AssistContext } from './assist'
+export type { AssistContext } from './assist'
+
+
+/* Demo fixture helpers remain here; production adapters live in assistApi.ts. */
 
 export const CONTEXT_DELAY_MS = 1100
 export const CONTEXT_TTL_MS = 15 * 60 * 1000

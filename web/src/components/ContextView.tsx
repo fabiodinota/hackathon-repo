@@ -5,7 +5,7 @@ import { AssistCard } from './AssistCard'
 import { ContextPreview } from './ContextPreview'
 
 type Props = { state: AssistState; onToggle: () => void; onPause: () => void; onDelete: () => void; onDismiss: () => void; onWhy: () => void }
-const statusLabels = { paused: 'Assist paused', waiting: 'Waiting for context', ready: 'Suggestion ready', empty: 'No suggestion available yet' }
+const statusLabels: Record<AssistState['status'], string> = { paused: 'Assist paused', waiting: 'Waiting for context', ready: 'Suggestion ready', empty: 'No suggestion available yet', error: 'Unable to load suggestions' }
 
 export function ContextView({ state, onToggle, onPause, onDelete, onDismiss, onWhy }: Props) {
   const [showPreview, setShowPreview] = useState(false)
