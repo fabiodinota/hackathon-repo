@@ -2,13 +2,13 @@ import { createApp } from "./api/app.js";
 import { ContextBuilder } from "./context/builder.js";
 import { loadConfig } from "./config/env.js";
 import { IntentService } from "./intent/service.js";
-import { VertexIntentProvider } from "./intent/vertex-provider.js";
+import { XpikiIntentProvider } from "./intent/xpiki-provider.js";
 import { EphemeralIntentStore } from "./session/store.js";
 import { loadCatalogue } from "./catalogue/loader.js";
 import { CatalogueMatcher } from "./catalogue/matcher.js";
 const config = loadConfig();
-const provider = new VertexIntentProvider({
-  ...config.vertex,
+const provider = new XpikiIntentProvider({
+  ...config.xpiki,
   timeoutMs: config.timeoutMs,
   threshold: config.threshold,
 });

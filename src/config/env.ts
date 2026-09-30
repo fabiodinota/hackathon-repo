@@ -7,7 +7,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     return value;
   };
   const host = env.HOST ?? "127.0.0.1";
-  if (host !== "127.0.0.1") throw new Error("HOST must be 127.0.0.1");
+  // Compose publishes only the web proxy on host loopback; API stays internal.
+  if (!["127.0.0.1", "0.0.0.0"].includes(host))
+    throw new Error("HOST must be 127.0.0.1 or 0.0.0.0");
   const origins = (env.ALLOWED_ORIGINS ?? "http://localhost:5173")
     .split(",")
     .map((s) => s.trim());
@@ -41,7 +43,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     origins,
     sessionToken,
     threshold,
-    timeoutMs: integer("VERTEX_TIMEOUT_MS", 5000, 10000),
+    timeoutMs: integer("XPIKI_TIMEOUT_MS", 5000, 10000),
     ttlMs: integer("CONTEXT_TTL_MS", 300000, 300000),
     context: {
       maxFrames: integer("CONTEXT_MAX_FRAMES", 3, 3),
@@ -49,10 +51,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
       maxImageBytes: integer("CONTEXT_MAX_IMAGE_BYTES", 1200000, 1200000),
       maxPayloadBytes: integer("CONTEXT_MAX_PAYLOAD_BYTES", 4000000, 4000000),
     },
-    vertex: {
-      projectId: env.VERTEX_PROJECT_ID ?? "",
-      region: env.VERTEX_REGION ?? "europe-west1",
-      model: env.VERTEX_MODEL ?? "gemini-2.5-flash-lite",
+    xpiki: {
+      apiKey: env.XPIKI_API_KEY ?? "",
+      baseUrl: env.XPIKI_BASE_URL ?? "https://api.xpiki.com/v1",
+      model: env.XPIKI_MODEL ?? "gpt-6-astra",
     },
   };
 }
