@@ -4,3 +4,6 @@ dist
 **/target
 **/node_modules
 **/dist
+
+web/public/ocr/
+web/artifacts/

@@ -2,8 +2,17 @@
 name = "kbc-privacy-sidecar"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.96"
 publish = false
 license = "LicenseRef-Proprietary"
+
 [dependencies]
-axum = "0.8"
-tokio = { version = "1", features = ["macros", "rt-multi-thread", "net", "signal"] }
+kernel = { package = "kernel", git = "https://github.com/fabiodinota/interdict.git", rev = "6dfcad4eb2f09493207e1c6e5a1c96d5df992c68" }
+tokio = { version = "1.47", features = ["macros", "rt-multi-thread", "net"] }
+hyper = { version = "1.7", features = ["http1", "server"] }
+hyper-util = { version = "0.1", features = ["tokio", "server-auto"] }
+http-body-util = "0.1"
+bytes = "1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1"
