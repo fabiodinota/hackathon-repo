@@ -1,20 +1,7 @@
-# Vertex AI setup
+# XPIKI setup
 
-Legacy adapter reference: the current server uses `XpikiIntentProvider` and `XPIKI_*` variables from `.env.example`. The Vertex adapter remains in source/tests, but setting Google credentials or mounting `compose.cloud.yaml` does not switch the running provider. The instructions below apply only if Vertex is explicitly wired back into the server.
+Set XPIKI_API_KEY in the private backend .env. Defaults are XPIKI_BASE_URL=https://api.xpiki.com/v1, XPIKI_MODEL=gpt-6-luna, and XPIKI_TIMEOUT_MS=5000. Never put the key in frontend variables or commit it. Google credentials are no longer required; the legacy Vertex adapter remains in source.
 
-Enable Vertex AI in a Google Cloud project with billing and grant the runtime identity permission to call it, such as roles/aiplatform.user. These cloud changes are not performed by this POC.
+The backend uses the Responses API with strict JSON output, masked PNG inputs, and reasoning disabled for fast intent classification. A synthetic text classification took about 3.3 seconds with reasoning disabled in one local check; latency varies with provider load. Luna is a latency-oriented default, not a proven quality winner across every model.
 
-For local development, use Google Application Default Credentials:
-
-```sh
-gcloud auth application-default login
-gcloud auth application-default set-quota-project YOUR_PROJECT_ID
-```
-
-Set VERTEX_PROJECT_ID, VERTEX_REGION, VERTEX_MODEL and VERTEX_TIMEOUT_MS in backend .env. The example selects gemini-2.5-flash-lite in europe-west1 with a five-second timeout. Verify model availability in your project/region using the [Vertex documentation](https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/2-5-flash-lite). The global endpoint is also supported but does not imply European data residency.
-
-Google auth obtains and refreshes tokens through ADC. Workload identity may supply ADC in a hosted environment; hosting is outside this local POC. No cloud token belongs in VITE_ variables, screenshots, source or logs. VERTEX_ACCESS_TOKEN is not used.
-
-Requests contain reconstructed sanitized text and masked PNG vision parts, a separate system instruction, and a constrained JSON schema. The five-second deadline covers authentication and the provider call. A non-cancellable credential operation might finish later, but aborted work does not send context afterward. Network requests are aborted and late results ignored.
-
-Missing credentials, denied IAM, unavailable models, provider errors, safety blocks, truncated output, malformed JSON and invalid schema return null intent, empty signals and uncertainty. Error bodies from Google are not returned or logged. Verify a live setup only with consented synthetic sanitized context. Unit tests mock both credentials and transport and never contact Vertex.
+Only reconstructed sanitized text and masked PNGs are sent to XPIKI. Requests set store=false; that flag does not establish the provider's retention policy. Timeouts, HTTP failures, refusals, incomplete responses and invalid JSON return uncertainty. Tests mock transport. Live verification uses synthetic sanitized context.

@@ -24,7 +24,7 @@ services:
       SESSION_TOKEN: ${SESSION_TOKEN:?Run node scripts/setup-local.mjs first}
       XPIKI_API_KEY: ${XPIKI_API_KEY:-}
       XPIKI_BASE_URL: ${XPIKI_BASE_URL:-https://api.xpiki.com/v1}
-      XPIKI_MODEL: ${XPIKI_MODEL:-gpt-6-astra}
+      XPIKI_MODEL: ${XPIKI_MODEL:-gpt-6-luna}
       XPIKI_TIMEOUT_MS: ${XPIKI_TIMEOUT_MS:-5000}
       PRIVACY_SERVICE_URL: http://privacy:8081
     read_only: true
