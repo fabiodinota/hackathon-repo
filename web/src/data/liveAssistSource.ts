@@ -226,11 +226,7 @@ export function createLiveAssistSource(): AssistSource {
               : "Assist active · no confident intent yet",
           );
           timer = window.setTimeout(() => void tick(), 4000);
-        } catch (error) {
-          console.warn(
-            "Pipeline stage failed",
-            error instanceof Error ? error.message : "unknown",
-          );
+        } catch {
           if (!signal.aborted) {
             frames = [];
             onSnapshot(emptySnapshot);

@@ -45,7 +45,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     origins,
     sessionToken,
     threshold,
-    timeoutMs: integer("XPIKI_TIMEOUT_MS", 5000, 10000),
+    timeoutMs: integer("XPIKI_TIMEOUT_MS", 10000, 10000),
     ttlMs: integer("CONTEXT_TTL_MS", 300000, 300000),
     context: {
       maxFrames: integer("CONTEXT_MAX_FRAMES", 3, 3),
