@@ -97,7 +97,7 @@ export default function App({ assistSource = demoAssistSource }: { assistSource?
     bankScreen?.querySelector<HTMLButtonElement>('.bottom-nav button:last-of-type')?.focus({ preventScroll: true })
   }
 
-  return <main className="app-shell"><div className="frames-row">
+  return <main className="app-shell"><div className="integration-controls"><label htmlFor="pairing-token">Local pairing token</label><input id="pairing-token" type="password" autoComplete="off" placeholder="Token from local .env" /><p id="pipeline-status">Assist off · only the mock marketplace is captured after consent</p></div><div className="frames-row">
     <section className="frame-column"><p className="frame-label">KBC banking app</p><PhoneFrame screenRef={setBankScreen}>
       <header className="topbar">
         <div className="brand" aria-label="KBC"><span className="brand-mark" aria-hidden="true">K</span><span>KBC</span></div>

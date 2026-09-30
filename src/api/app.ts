@@ -34,7 +34,10 @@ export function createApp(options: AppOptions) {
         return json({ error: "FORBIDDEN_HOST" }, 403);
       set.headers["cache-control"] = "no-store";
       if (url.pathname === "/health" && request.method === "GET") return;
-      const origin = request.headers.get("origin");
+      let origin = request.headers.get("origin");
+      if (!origin && request.method === "GET" && request.headers.get("sec-fetch-site") === "same-origin") {
+        try { origin = new URL(request.headers.get("referer") ?? "").origin; } catch {}
+      }
       if (!origin || !options.origins.includes(origin))
         return json({ error: "FORBIDDEN_ORIGIN" }, 403);
       set.headers["access-control-allow-origin"] = origin;

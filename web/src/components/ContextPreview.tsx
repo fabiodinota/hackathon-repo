@@ -6,7 +6,7 @@ const formatDate = (date: string) => new Intl.DateTimeFormat('en-GB', { timeZone
 export function ContextPreview({ context }: { context: AssistContext }) {
   return <section className="context-preview">
     <div className="preview-header"><h2>Shared with KBC</h2><span className="safe-badge"><ShieldCheck size={13} /> Summary only</span></div>
-    <p className="fixture-label">Simulated local context payload</p>
+    <p className="fixture-label">Validated intent summary</p>
     <dl className="context-grid">
       <div><dt>Intent</dt><dd>{context.intent}</dd></div>
       <div><dt>Confidence</dt><dd className="capitalize">{context.confidence}</dd></div>

@@ -13,7 +13,7 @@ export function ContextOnboardingDrawer({ container, open, onEnable, onDecline }
         <p className="drawer-eyebrow">A more personal KBC</p>
         <Drawer.Title className="drawer-title">Enable context?</Drawer.Title>
         <Drawer.Description id="context-drawer-description" className="drawer-description">
-          Allow KBC to use safe context from your activity to offer relevant next steps when they matter.
+          Allow local capture of this demo marketplace. Form values are hidden locally; OCR and Interdict filter the image before sanitized images and text go to the configured cloud AI. KBC receives the resulting intent summary.
         </Drawer.Description>
         <div className="drawer-example"><Eye size={17} /><span>You can change your choice anytime in the Context tab.</span></div>
         <div className="drawer-actions">
