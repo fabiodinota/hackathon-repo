@@ -1,0 +1,16 @@
+name: Container builds
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose
+        env:
+          SESSION_TOKEN: ci-container-validation-token-not-a-real-secret
+        run: docker compose config --quiet
+      - run: docker build -t kbc-api-check .
+      - run: docker build -t kbc-web-check web
+      - run: docker build -t kbc-privacy-check services/privacy

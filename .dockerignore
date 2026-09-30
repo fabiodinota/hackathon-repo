@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/target
+.git
+.env
+.env.*
+!.env.example
+**/*.log
+**/*.pdf
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.webp
+**/*credentials*.json
+**/*service-account*.json
+coverage

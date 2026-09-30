@@ -2,7 +2,14 @@ import js from "@eslint/js";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import parser from "@typescript-eslint/parser";
 export default [
-  { ignores: ["node_modules/**", "coverage/**", "dist/**"] },
+  {
+    ignores: [
+      "**/node_modules/**",
+      "coverage/**",
+      "**/dist/**",
+      "**/target/**",
+    ],
+  },
   {
     ...js.configs.recommended,
     files: ["**/*.js", "**/*.mjs"],
@@ -12,6 +19,7 @@ export default [
         process: "readonly",
         fetch: "readonly",
         setTimeout: "readonly",
+        URL: "readonly",
       },
     },
     rules: {
@@ -20,8 +28,8 @@ export default [
     },
   },
   {
-    files: ["**/*.ts"],
-    languageOptions: { parser },
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: { parser, parserOptions: { ecmaFeatures: { jsx: true } } },
     plugins: { "@typescript-eslint": tseslint },
     rules: {
       ...tseslint.configs.recommended.rules,

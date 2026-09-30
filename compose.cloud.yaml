@@ -1,0 +1,12 @@
+# Legacy Vertex ADC mount; does not change the current Xpiki runtime provider.
+services:
+  api:
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/google-adc.json
+    volumes:
+      - type: bind
+        source: ${GOOGLE_ADC_FILE:?Set GOOGLE_ADC_FILE to an existing ADC JSON file}
+        target: /run/secrets/google-adc.json
+        read_only: true
+        bind:
+          create_host_path: false

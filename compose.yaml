@@ -1,0 +1,45 @@
+name: kbc-assist
+services:
+  web:
+    build: ./web
+    ports:
+      - "127.0.0.1:${WEB_PORT:-5173}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    networks: [app]
+  api:
+    build: .
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      ALLOWED_ORIGINS: http://localhost:${WEB_PORT:-5173},http://127.0.0.1:${WEB_PORT:-5173}
+      SESSION_TOKEN: ${SESSION_TOKEN:?Run node scripts/setup-local.mjs first}
+      XPIKI_API_KEY: ${XPIKI_API_KEY:-}
+      XPIKI_BASE_URL: ${XPIKI_BASE_URL:-https://api.xpiki.com/v1}
+      XPIKI_MODEL: ${XPIKI_MODEL:-gpt-6-astra}
+      XPIKI_TIMEOUT_MS: ${XPIKI_TIMEOUT_MS:-5000}
+      PRIVACY_SERVICE_URL: http://privacy:8081
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    networks: [app, privacy]
+  privacy:
+    build: ./services/privacy
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    networks: [privacy]
+networks:
+  app: {}
+  privacy:
+    internal: true

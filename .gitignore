@@ -6,7 +6,6 @@ dist/
 coverage/
 .DS_Store
 *.log
-/POC_PLAN.md
 *.pdf
 *.png
 *.jpg
@@ -14,3 +13,5 @@ coverage/
 *.webp
 credentials*.json
 *service-account*.json
+**/target/
+.secrets/
