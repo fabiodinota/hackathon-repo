@@ -10,7 +10,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   // Compose publishes only the web proxy on host loopback; API stays internal.
   if (!["127.0.0.1", "0.0.0.0"].includes(host))
     throw new Error("HOST must be 127.0.0.1 or 0.0.0.0");
-  const origins = (env.ALLOWED_ORIGINS ?? "http://localhost:5173,http://127.0.0.1:5173")
+  const origins = (
+    env.ALLOWED_ORIGINS ?? "http://localhost:5173,http://127.0.0.1:5173"
+  )
     .split(",")
     .map((s) => s.trim());
   if (
