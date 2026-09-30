@@ -1,19 +1,71 @@
 # KBC Assist POC
 
-Local hackathon proof of concept. Items 6–7 provide a sanitized context builder and a Vertex AI intent service. The frontend, OCR, privacy filter and service matcher are separate team responsibilities.
+Backend for **items 6–7**: build short-lived sanitized context, interpret intent through Vertex AI, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, catalogue matching and notifications are separate team responsibilities.
 
-Use synthetic demonstration data only. Pattern filtering cannot guarantee complete PII removal. Cloud credentials belong in the backend.
+## Install and run
 
-## Local backend
+Requires Node.js 22+. The project includes a local Bun executable, so a global Bun installation is optional.
 
 ```sh
+npm install --no-package-lock
 cp .env.example .env
-npm install
-npm run typecheck
-npm test
+```
+
+Generate a random local pairing token and paste it into SESSION_TOKEN in .env:
+
+```sh
+node -e 'console.log(require("node:crypto").randomBytes(32).toString("hex"))'
+```
+
+This is a local pairing token, not a Google credential. Enter it in the future local consent UI or a trusted API client; do not embed it in frontend source or log it. Configure Google credentials following [cloud setup](docs/cloud-setup.md), then run:
+
+```sh
 npm run dev
 ```
 
-The backend listens on loopback and exposes POST /api/intent/analyze. Send a JSON body matching SanitizedInput and Authorization: Bearer SESSION_TOKEN. The route returns only IntentResult; safe error codes never include prompts, screenshots, OCR, or provider output. Context contains at most the newest three allowlisted frames, is capped at 60 seconds and size limits, and is held only in memory. Intent results expire after five minutes. Pause/delete integration must call EphemeralIntentStore.pause/delete so pending or cleared results cannot reappear.
+Bun loads .env. The server listens at http://127.0.0.1:3000. GET /health returns a status object. ALLOWED_ORIGINS defaults to http://localhost:5173. Without Google configuration, analysis returns an uncertain result; there is no fake successful AI fallback.
 
-Items 1–5 must send frames after local OCR and Interdict redaction using the SanitizedFrame/SanitizedInput contract in src/context/types.ts. Vertex credentials remain server-side. Timeouts, provider errors, malformed JSON, and invalid confidence yield uncertain=true and no intent. Confidence is a demo heuristic, not a calibrated probability. The service does not perform KBC catalogue matching or notifications.
+## Integration
+
+Read [the API contract](docs/integration.md). Session startup requires the local pairing token and explicit consent. The returned session ID and distinct session token are required for subsequent calls, together with an allowlisted Origin.
+
+| Route                    | Purpose                                                      |
+| ------------------------ | ------------------------------------------------------------ |
+| POST /api/session/start  | Require pairing token and consent; issue session credentials |
+| POST /api/intent/analyze | Accept already-sanitized frames; return only IntentResult    |
+| GET /api/context         | Return the current intent or null                            |
+| POST /api/session/pause  | Abort pending work, clear results, reject new analysis       |
+| POST /api/session/resume | Allow processing again in an unexpired session               |
+| DELETE /api/context      | Clear results and invalidate pending work                    |
+| POST /api/session/stop   | Revoke and remove the session                                |
+
+createApp composes the routes into one Elysia server. The independent contracts are ContextBuilder, IntentProvider and SanitizedInputAdapter. Do not add a second backend. Only home_purchase_planning and a reviewed set of generic signals are currently supported. Extend the vocabulary with tests to add scenarios.
+
+## Checks
+
+```sh
+npm run format
+npm run format:check
+npm run lint
+npm run typecheck
+npm test
+npm run smoke
+```
+
+Tests mock Vertex and credentials. The smoke test starts the actual Bun/Elysia server on a temporary loopback port and checks session controls without cloud calls. CI runs the same checks. Authored modules remain below 500 lines. The generated Bun lockfile is the dependency pinning source; use bun install --frozen-lockfile when Bun is installed.
+
+## Privacy and limits
+
+- Newest three usable frames, at most 60 seconds old. Incoming windows may be narrower.
+- Up to 1.2 MB decoded PNG per image, 4 MB total context JSON, 4.5 MB HTTP body, 20 incoming frames, 20 text entries per frame and 240 characters per text entry.
+- Item 5 must mask and downscale images to at most 1024 × 1024 before submission. PNG metadata is rejected. This builder does not perform OCR or pixel redaction.
+- Only structured intents and minimal session credentials/control state are stored. Everything is memory-only and expires after five minutes, with cleanup every ten seconds. Restart clears all state.
+- Pause, delete and stop abort pending requests and discard late results. AI failure clears earlier suggestions.
+- Conservative text guards catch common sensitive-value mistakes. **These guards and PNG checks do not prove arbitrary input is PII-free.** Use only synthetic demo data that passed the upstream privacy pipeline.
+- Fixed output vocabulary prevents copied account values, names and arbitrary descriptions from reaching clients. Confidence is a demo heuristic, not a calibrated probability.
+
+## Remaining integration work
+
+Items 1–5 were absent when this backend was built. The adapter boundary is documented and tested with mocks; live OCR/masking and the complete UI flow remain to be integrated. The separate Interdict repository was inspected read-only and was not changed or copied.
+
+Live Vertex availability, IAM, latency and recognition are unverified without a configured Google project. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.

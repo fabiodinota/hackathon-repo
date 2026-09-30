@@ -28,7 +28,7 @@ export const valid: IntentResult = {
 export const sensitive = () => [
   ["fixture", "example.invalid"].join("@"),
   ["BE", "68", "5390", "0754", "7034"].join(""),
-  Array(4).fill("4111").join(" "),
+  ["4" + "1".repeat(3), ...Array(3).fill("1".repeat(4))].join(" "),
 ];
 export const png =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC";
