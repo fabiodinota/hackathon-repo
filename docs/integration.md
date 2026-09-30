@@ -2,7 +2,7 @@
 
 React/Vite owns consent, capture, previews and notifications. Local OCR plus Rust/Interdict own detection, validation and opaque masking. Bun/Elysia owns context limits, sessions and the Xpiki call. Xpiki interprets intent only; a separate matcher selects services.
 
-No items 1–5 implementation was present. Implement SanitizedInputAdapter beside that pipeline and invoke it only after successful filtering. A source label or TypeScript type cannot prove redaction. Discard upstream frames on OCR, confidence or span-to-box mapping failure.
+The local screen-consent pipeline is integrated in web/src/features/ and services/privacy/. It currently previews masked frames and category metadata without cloud submission. Implement SanitizedInputAdapter beside that pipeline and invoke it only after successful filtering. A source label or TypeScript type cannot prove redaction. Discard upstream frames on OCR, confidence or span-to-box mapping failure.
 
 ## Interdict interfaces inspected read-only
 
@@ -10,7 +10,9 @@ No items 1–5 implementation was present. Implement SanitizedInputAdapter besid
 - StreamingDetector::scan, ScanResult (NoMatch, PartialMatch, FullMatch) and Detection (category, start, end, confidence) in crates/kernel/src/policy/streaming/detector.rs.
 - StreamingDetector::apply_redaction and RedactionEngine in crates/kernel/src/policy/redaction.rs.
 
-Detection spans index UTF-8 bytes, not JavaScript UTF-16 characters. Item 5 must map spans correctly to OCR boxes. Do not forward raw text, hashes, detections or internal metadata. This backend adds no sidecar or competing detector.
+Detection spans index UTF-8 bytes, not JavaScript UTF-16 characters. Item 5 must map spans correctly to OCR boxes. Do not forward raw text, hashes, detections or internal metadata. The browser calls the real Rust detector through /privacy/v1/inspect; the backend has no competing detector.
+
+The local preview accepts 40% overall OCR confidence without per-word rejection. The backend contract below still requires 80% when confidence is supplied. A future cloud adapter must reconcile this explicitly; omitting confidence to bypass it is not an integration solution.
 
 ## Session flow
 

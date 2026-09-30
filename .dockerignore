@@ -14,3 +14,6 @@
 **/*credentials*.json
 **/*service-account*.json
 coverage
+
+web/public/ocr
+web/artifacts

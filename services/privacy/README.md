@@ -1,11 +1,11 @@
-# Privacy sidecar boundary
+# Interdict privacy service
 
-Rust runs in its own container in the Compose stack. No Rust installation is needed on a teammate's machine.
+This Rust service reuses Interdict PatternRegistry, StreamingDetector, IBAN and Luhn validators. Cargo pins the kernel to revision 6dfcad4eb2f09493207e1c6e5a1c96d5df992c68 from https://github.com/fabiodinota/interdict.
 
-- /health: transport is alive.
-- /ready and POST /v1/sanitize: HTTP 503 until the real detector is connected.
-- This scaffold performs no OCR, detection, or masking. It never echoes submitted data.
-- Only the backend can reach it through the internal network at http://privacy:8081.
-- Reuse Interdict's detector through an adapter. Its spans are UTF-8 byte offsets; map them to OCR boxes before masking.
-- Return the existing SanitizedInput contract only after actual filtering, or a failure. Never pass raw data through as a fallback.
-- Interdict is not copied or modified here. Retain its licensing when importing code.
+GET /health and /ready report availability. POST /v1/inspect accepts JSON text and returns UTF-8 byte spans. Text is never echoed, logged or persisted. Invalid input and partial-only lines discard the frame. The browser validates spans before opaque masking. This replaces the old /v1/sanitize scaffold.
+
+Native development binds 127.0.0.1:8081. Compose binds HOST=0.0.0.0 on the internal privacy network; no privacy port is published. Requests are bounded and timed out.
+
+Run cargo run --locked --manifest-path services/privacy/Cargo.toml. Checks: cargo fmt, cargo test --locked and cargo clippy --locked. Docker installs CMake and Clang.
+
+The locked kernel dependencies require Rust 1.96 or newer; the Docker builder uses Rust 1.98. Interdict retains its original proprietary license.

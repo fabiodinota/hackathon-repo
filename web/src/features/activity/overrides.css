@@ -1,0 +1,166 @@
+/* Layout and accessible controls for the prototype. */
+[hidden] {
+  display: none !important;
+}
+body {
+  font-family: system-ui, sans-serif;
+}
+.hero h1 {
+  font-family: Georgia, serif;
+}
+button {
+  font-family: inherit;
+}
+button:focus-visible,
+input:focus-visible + span {
+  outline: 3px solid #22a48a;
+  outline-offset: 4px;
+}
+.consent input {
+  position: static;
+  opacity: 1;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--mint);
+}
+.consent > span {
+  display: none;
+}
+.actions {
+  flex-wrap: wrap;
+}
+.preview {
+  height: auto;
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+  background: #f2f6f5;
+}
+.capture-proof {
+  margin-top: 14px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fbfcfc;
+}
+.proof-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+.proof-heading span {
+  color: var(--muted);
+}
+#capture-proof {
+  display: block;
+  max-height: 150px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-top: 10px;
+}
+.capture-proof p,
+.capture-proof small {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+  margin: 10px 0 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 55px 12px;
+}
+.empty small {
+  display: block;
+  margin-top: 8px;
+}
+#status {
+  color: var(--mint);
+  min-height: 2em;
+  font-size: 12px;
+}
+.demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.demo-actions .fixture {
+  background: transparent;
+  color: #146c59;
+  padding: 8px 0;
+  text-align: left;
+}
+.warning {
+  background: #fff6df;
+  color: #655019;
+  font-size: 12px;
+  padding: 12px;
+  border-radius: 8px;
+}
+.activity {
+  list-style: none;
+  padding: 0;
+}
+.activity li {
+  border-top: 1px solid var(--line);
+  padding: 14px 0;
+}
+.activity span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.activity:empty::after {
+  content: "No frames processed yet.";
+  color: var(--muted);
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f3f6f5;
+  padding: 16px;
+  border-radius: 8px;
+  font: 12px/1.7 monospace;
+}
+.pipeline {
+  grid-template-columns: 34% 66%;
+  gap: 20px;
+}
+.steps {
+  padding-right: 20px;
+}
+@media (max-width: 800px) {
+  .pipeline {
+    grid-template-columns: 1fr;
+  }
+  .steps {
+    padding: 0;
+  }
+}
+@media (max-width: 420px) {
+  .shell {
+    padding: 0 16px 25px;
+  }
+  .card,
+  .pipeline {
+    padding: 20px;
+  }
+  .hero h1 {
+    font-size: 34px;
+  }
+  .metrics {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

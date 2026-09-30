@@ -14,7 +14,7 @@ The reviewer must not edit files, commit, push, reset, clean, rebase, or change 
 - **9 — Catalogue and matching:** `src/catalogue/`, `kbc-services.json`, recommendation routes/tests.
 - **Integration:** `src/api/`, `src/server.ts`, `src/config/`, `docs/integration.md`, Compose/Docker boundaries where they affect these components.
 
-Components 1–5 are upstream dependencies. Treat the Rust privacy service as a transport scaffold: its sanitize endpoint intentionally returns 503 until the detector is integrated. Do not silently claim that the scaffold performs redaction.
+Components 1–5 are upstream dependencies. The Rust service now exposes Interdict inspection at /v1/inspect; browser modules map spans and mask pixels. Cloud handoff remains pending.
 
 The runtime was changed to Xpiki during scaffolding. Verify the provider selected in `src/server.ts` at review time. Review both adapters and explicitly identify missing Xpiki-specific tests, response status/refusal handling, endpoint/redirect restrictions, and unsupported model options; passing Vertex mocks does not validate Xpiki.
 
@@ -66,7 +66,7 @@ The runtime was changed to Xpiki during scaffolding. Verify the provider selecte
 
 - Trace `POST /api/intent/analyze` through context building, provider/service validation, store lease/commit, catalogue matching, and `GET /api/context`.
 - Check request body limits, content type handling, duplicate requests, provider failures, and status-code mapping.
-- Verify Docker keeps the API and privacy service internal, publishes only the loopback web port, keeps credentials out of images, and does not imply that the Rust scaffold sanitizes data.
+- Verify Docker keeps the API and privacy service internal, publishes only the loopback web port, keeps credentials out of images, and accurately describes text inspection in Rust and pixel masking in the browser.
 
 ## Evidence and tests
 
