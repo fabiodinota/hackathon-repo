@@ -1,36 +1,124 @@
-import { PipelineError } from '../errors/pipeline-errors.js';
-import { defaultContextPolicy, type ContextPolicy } from './policy.js';
-import type { ModelContext, SanitizedFrame, SanitizedInput } from './types.js';
-const email = /\b[^\s@]+@[^\s@]+\.[^\s@]+\b/i;
-const iban = /\b[A-Z]{2}\d{2}[A-Z0-9]{11,30}\b/i;
-const card = /\b(?:\d[ -]?){13,19}\b/;
-const secret = /\b(?:password|passwd|secret|api[_ -]?key|token)\s*[:=]/i;
-export type ContextBuilderOptions = Partial<ContextPolicy> & { now?: () => number };
+import { PipelineError } from "../errors/pipeline-errors.js";
+import { defaultContextPolicy, type ContextPolicy } from "./policy.js";
+import type { ModelContext, ModelFrame, SanitizedInput } from "./types.js";
+import { validSanitizedPng } from "./image-policy.js";
+import { violatesTextPolicy } from "./text-policy.js";
+export type ContextBuilderOptions = Partial<ContextPolicy> & {
+  now?: () => number;
+};
+export const sessionIdPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export class ContextBuilder {
-  private readonly policy: ContextPolicy; private readonly now: () => number;
-  constructor(options: ContextBuilderOptions = {}) { this.policy = { ...defaultContextPolicy, ...options }; this.now = options.now ?? Date.now; }
+  private readonly policy: ContextPolicy;
+  private readonly now: () => number;
+  constructor(options: ContextBuilderOptions = {}) {
+    this.policy = { ...defaultContextPolicy, ...options };
+    this.policy.maxFrames = Math.min(3, this.policy.maxFrames);
+    this.policy.maxSeconds = Math.min(60, this.policy.maxSeconds);
+    if (
+      Object.values(this.policy).some(
+        (v) => typeof v === "number" && (!Number.isFinite(v) || v < 1),
+      )
+    )
+      throw new Error("Invalid context policy");
+    this.now = options.now ?? Date.now;
+  }
   build(input: SanitizedInput): ModelContext {
-    if (!input || typeof input !== 'object' || !this.validSessionId(input.sessionId)) throw new PipelineError('INVALID_INPUT', 'The sanitized session is malformed.');
-    if (!Array.isArray(input.frames) || input.frames.length === 0) throw new PipelineError('EMPTY_CONTEXT', 'No sanitized frames were provided.');
-    if (!Number.isFinite(input.timeWindowSeconds) || input.timeWindowSeconds <= 0) throw new PipelineError('INVALID_INPUT', 'The context time window is invalid.');
+    if (
+      !input ||
+      typeof input !== "object" ||
+      typeof input.sessionId !== "string" ||
+      !sessionIdPattern.test(input.sessionId)
+    )
+      throw new PipelineError("INVALID_INPUT", "Invalid session.");
+    if (!Array.isArray(input.frames) || input.frames.length === 0)
+      throw new PipelineError("EMPTY_CONTEXT", "No sanitized frames.");
+    if (
+      input.frames.length > 20 ||
+      !Number.isFinite(input.timeWindowSeconds) ||
+      input.timeWindowSeconds <= 0
+    )
+      throw new PipelineError("INVALID_INPUT", "Invalid context.");
+    const now = this.now();
     const window = Math.min(input.timeWindowSeconds, this.policy.maxSeconds);
-    const validFrames = input.frames.filter((frame) => this.isUsableFrame(frame)).sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp)).slice(0, this.policy.maxFrames);
-    if (validFrames.length === 0) throw new PipelineError('EMPTY_CONTEXT', 'No usable sanitized frames remain.');
-    const newest = Date.parse(validFrames[0].timestamp);
-    if (this.now() - newest > window * 1000) throw new PipelineError('EXPIRED_SESSION', 'The sanitized session has expired.');
-    const frames = validFrames.map((frame) => ({ ...(frame.imageBase64 ? { imageBase64: frame.imageBase64 } : {}), safeText: frame.safeText.filter((text) => this.safeText(text)).slice(0, this.policy.maxTextItemsPerFrame), timestamp: frame.timestamp }));
-    const context: ModelContext = { sessionId: input.sessionId, frames, timeWindowSeconds: window };
-    if (Buffer.byteLength(JSON.stringify(context), 'utf8') > this.policy.maxPayloadBytes) throw new PipelineError('PAYLOAD_TOO_LARGE', 'The sanitized context exceeds its size limit.');
-    if (frames.every((frame) => !frame.imageBase64 && frame.safeText.length === 0)) throw new PipelineError('EMPTY_CONTEXT', 'No safe content remains after filtering.');
+    const valid = input.frames
+      .map((frame) => this.frame(frame))
+      .filter((f): f is ModelFrame => !!f)
+      .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+    if (!valid.length)
+      throw new PipelineError("EMPTY_CONTEXT", "No usable sanitized frames.");
+    const frames = valid
+      .filter(
+        (f) =>
+          Date.parse(f.timestamp) >= now - window * 1000 &&
+          Date.parse(f.timestamp) <= now,
+      )
+      .slice(0, this.policy.maxFrames);
+    if (!frames.length)
+      throw new PipelineError("EXPIRED_SESSION", "Context expired.");
+    const context = {
+      sessionId: input.sessionId,
+      frames,
+      timeWindowSeconds: window,
+    };
+    if (
+      Buffer.byteLength(JSON.stringify(context)) > this.policy.maxPayloadBytes
+    )
+      throw new PipelineError("PAYLOAD_TOO_LARGE", "Context too large.");
     return context;
   }
-  private isUsableFrame(frame: SanitizedFrame): boolean {
-    if (!frame || typeof frame !== 'object' || typeof frame.id !== 'string' || !frame.id.trim() || frame.source !== 'allowlisted_tab' || !Array.isArray(frame.safeText)) return false;
-    const timestamp = Date.parse(frame.timestamp); if (!Number.isFinite(timestamp) || timestamp > this.now() + 5000) return false;
-    if (frame.ocrConfidence !== undefined && (!Number.isFinite(frame.ocrConfidence) || frame.ocrConfidence < 0 || frame.ocrConfidence > 1)) return false;
-    if (frame.imageBase64 !== undefined && (typeof frame.imageBase64 !== 'string' || Buffer.byteLength(frame.imageBase64, 'utf8') > this.policy.maxImageBytes)) return false;
-    return true;
+  private frame(value: unknown): ModelFrame | undefined {
+    if (!value || typeof value !== "object") return;
+    const f = value as Record<string, unknown>;
+    if (
+      typeof f.id !== "string" ||
+      !f.id.trim() ||
+      f.id.length > 100 ||
+      f.source !== "allowlisted_tab"
+    )
+      return;
+    if (
+      typeof f.timestamp !== "string" ||
+      !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(f.timestamp) ||
+      !Number.isFinite(Date.parse(f.timestamp)) ||
+      new Date(f.timestamp).toISOString() !== f.timestamp
+    )
+      return;
+    if (
+      f.ocrConfidence !== undefined &&
+      (typeof f.ocrConfidence !== "number" ||
+        !Number.isFinite(f.ocrConfidence) ||
+        f.ocrConfidence < 0.8 ||
+        f.ocrConfidence > 1)
+    )
+      return;
+    if (
+      !Array.isArray(f.safeText) ||
+      f.safeText.length > this.policy.maxTextItemsPerFrame
+    )
+      return;
+    if (
+      !f.safeText.every(
+        (t) =>
+          typeof t === "string" &&
+          t.length <= this.policy.maxTextItemLength &&
+          !violatesTextPolicy(t),
+      )
+    )
+      return;
+    const safeText = f.safeText
+      .map((t) => (t as string).trim())
+      .filter(Boolean);
+    if (
+      f.imageBase64 !== undefined &&
+      !validSanitizedPng(f.imageBase64, this.policy.maxImageBytes)
+    )
+      return;
+    if (!safeText.length && !f.imageBase64) return;
+    return {
+      safeText,
+      timestamp: f.timestamp,
+      ...(f.imageBase64 ? { imageBase64: f.imageBase64 as string } : {}),
+    };
   }
-  private safeText(value: unknown): value is string { return typeof value === 'string' && value.trim().length > 0 && value.length <= this.policy.maxTextItemLength && !email.test(value) && !iban.test(value.replaceAll(' ', '')) && !card.test(value) && !secret.test(value); }
-  private validSessionId(value: unknown): value is string { return typeof value === 'string' && /^[a-zA-Z0-9_-]{8,100}$/.test(value); }
 }

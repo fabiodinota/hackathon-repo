@@ -11,6 +11,19 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
-  "dependencies": { "@elysiajs/node": "^1.4.2", "elysia": "^1.4.2", "zod": "^3.25.76" },
-  "devDependencies": { "@types/node": "^22.15.21", "@typescript-eslint/eslint-plugin": "^8.32.1", "@typescript-eslint/parser": "^8.32.1", "eslint": "^9.26.0", "prettier": "^3.5.3", "typescript": "^5.8.3", "vitest": "^3.1.2" }
+  "dependencies": {
+    "elysia": "^1.4.2",
+    "google-auth-library": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@types/node": "^22.15.21",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "bun": "^1.4.2",
+    "eslint": "^9.26.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  }
 }

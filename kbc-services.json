@@ -1,0 +1,215 @@
+{
+  "catalogueVersion": "poc-2026-09-30",
+  "market": "Belgium",
+  "note": "POC catalogue based on KBC Belgium service categories. Verify names, URLs, eligibility and availability against live KBC sources before production use.",
+  "services": [
+    {
+      "id": "home-buying-checklist",
+      "name": "Home-buying checklist",
+      "category": "home",
+      "intents": ["home_purchase_planning", "moving_home"],
+      "keywords": [
+        "house",
+        "apartment",
+        "property",
+        "buy home",
+        "mortgage",
+        "notary"
+      ],
+      "type": "guide",
+      "path": "/home-buying-checklist",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "mortgage-simulation",
+      "name": "Mortgage simulation",
+      "category": "home",
+      "intents": ["home_purchase_planning", "refinancing"],
+      "keywords": [
+        "mortgage",
+        "home loan",
+        "monthly payment",
+        "interest rate",
+        "borrow"
+      ],
+      "type": "calculator",
+      "path": "/mortgage-simulation",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "home-loan-application",
+      "name": "Home loan application",
+      "category": "home",
+      "intents": ["home_purchase_planning", "renovation_planning"],
+      "keywords": ["apply mortgage", "home loan", "loan application"],
+      "type": "application",
+      "path": "/home-loan",
+      "requiresAuthentication": true
+    },
+    {
+      "id": "renovation-loan",
+      "name": "Renovation loan",
+      "category": "loans",
+      "intents": ["renovation_planning"],
+      "keywords": ["renovate", "renovation", "remodel", "construction"],
+      "type": "loan",
+      "path": "/renovation-loan",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "personal-loan",
+      "name": "Personal loan",
+      "category": "loans",
+      "intents": ["large_purchase", "financial_planning"],
+      "keywords": ["personal loan", "borrow money", "loan calculator"],
+      "type": "loan",
+      "path": "/personal-loan",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "car-loan",
+      "name": "Car loan",
+      "category": "loans",
+      "intents": ["car_purchase"],
+      "keywords": ["car", "vehicle", "auto", "car loan"],
+      "type": "loan",
+      "path": "/car-loan",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "current-account",
+      "name": "Current account",
+      "category": "banking",
+      "intents": ["open_bank_account", "daily_banking"],
+      "keywords": [
+        "current account",
+        "checking account",
+        "daily banking",
+        "bank account"
+      ],
+      "type": "account",
+      "path": "/current-account",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "savings-account",
+      "name": "Savings account",
+      "category": "savings",
+      "intents": ["start_saving", "emergency_fund", "financial_planning"],
+      "keywords": ["save money", "savings", "saving account", "interest"],
+      "type": "account",
+      "path": "/savings-account",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "investment-planning",
+      "name": "Investment planning",
+      "category": "investing",
+      "intents": [
+        "start_investing",
+        "retirement_planning",
+        "financial_planning"
+      ],
+      "keywords": ["invest", "investment", "stocks", "funds", "portfolio"],
+      "type": "advice",
+      "path": "/investing",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "pension-savings",
+      "name": "Pension savings",
+      "category": "investing",
+      "intents": ["retirement_planning", "start_investing"],
+      "keywords": ["pension", "retirement", "long term saving"],
+      "type": "savings",
+      "path": "/pension-savings",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "payment-cards",
+      "name": "Debit and credit cards",
+      "category": "payments",
+      "intents": ["get_payment_card", "travel_preparation"],
+      "keywords": ["debit card", "credit card", "visa", "mastercard", "card"],
+      "type": "card",
+      "path": "/payment-cards",
+      "requiresAuthentication": true
+    },
+    {
+      "id": "mobile-payments",
+      "name": "Mobile payments",
+      "category": "payments",
+      "intents": ["set_up_mobile_payments", "daily_banking"],
+      "keywords": ["mobile payment", "contactless", "Apple Pay", "Google Pay"],
+      "type": "feature",
+      "path": "/mobile-payments",
+      "requiresAuthentication": true
+    },
+    {
+      "id": "home-insurance",
+      "name": "Home insurance",
+      "category": "insurance",
+      "intents": ["protect_home", "home_purchase_planning", "moving_home"],
+      "keywords": [
+        "home insurance",
+        "fire insurance",
+        "contents insurance",
+        "rental"
+      ],
+      "type": "insurance",
+      "path": "/home-insurance",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "car-insurance",
+      "name": "Car insurance",
+      "category": "insurance",
+      "intents": ["buy_car", "protect_car"],
+      "keywords": ["car insurance", "vehicle insurance", "roadside assistance"],
+      "type": "insurance",
+      "path": "/car-insurance",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "family-insurance",
+      "name": "Family and personal insurance",
+      "category": "insurance",
+      "intents": ["protect_family", "life_event_planning"],
+      "keywords": [
+        "family insurance",
+        "personal accident",
+        "life insurance",
+        "protection"
+      ],
+      "type": "insurance",
+      "path": "/family-insurance",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "travel-insurance",
+      "name": "Travel insurance",
+      "category": "insurance",
+      "intents": ["travel_preparation"],
+      "keywords": ["travel insurance", "holiday", "trip", "travel"],
+      "type": "insurance",
+      "path": "/travel-insurance",
+      "requiresAuthentication": false
+    },
+    {
+      "id": "digital-banking-support",
+      "name": "Digital banking support",
+      "category": "support",
+      "intents": ["banking_help", "card_problem", "payment_problem"],
+      "keywords": [
+        "help",
+        "blocked card",
+        "payment failed",
+        "transfer problem",
+        "contact bank"
+      ],
+      "type": "support",
+      "path": "/support",
+      "requiresAuthentication": false
+    }
+  ]
+}

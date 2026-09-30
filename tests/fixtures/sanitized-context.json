@@ -1,0 +1,12 @@
+{
+  "sessionId": "session_1",
+  "timeWindowSeconds": 60,
+  "frames": [
+    {
+      "id": "frame-1",
+      "safeText": ["Viewed property listings", "Used a mortgage calculator"],
+      "timestamp": "2026-09-30T11:59:55.000Z",
+      "source": "allowlisted_tab"
+    }
+  ]
+}
