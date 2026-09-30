@@ -1,5 +1,7 @@
 # Vertex AI setup
 
+Legacy adapter reference: the current server uses `XpikiIntentProvider` and `XPIKI_*` variables from `.env.example`. The Vertex adapter remains in source/tests, but setting Google credentials or mounting `compose.cloud.yaml` does not switch the running provider. The instructions below apply only if Vertex is explicitly wired back into the server.
+
 Enable Vertex AI in a Google Cloud project with billing and grant the runtime identity permission to call it, such as roles/aiplatform.user. These cloud changes are not performed by this POC.
 
 For local development, use Google Application Default Credentials:

@@ -1,6 +1,6 @@
 # Items 1–5 integration contract
 
-React/Vite owns consent, capture, previews and notifications. Local OCR plus Rust/Interdict own detection, validation and opaque masking. Bun/Elysia owns context limits, sessions and cloud calls. Vertex interprets intent only; a separate matcher selects services.
+React/Vite owns consent, capture, previews and notifications. Local OCR plus Rust/Interdict own detection, validation and opaque masking. Bun/Elysia owns context limits, sessions and the Xpiki call. Xpiki interprets intent only; a separate matcher selects services.
 
 No items 1–5 implementation was present. Implement SanitizedInputAdapter beside that pipeline and invoke it only after successful filtering. A source label or TypeScript type cannot prove redaction. Discard upstream frames on OCR, confidence or span-to-box mapping failure.
 
@@ -63,6 +63,6 @@ GET /api/context returns an object with intent equal to IntentResult or null. Er
 
 ## Composition
 
-createApp accepts a ContextBuilder, IntentService, EphemeralIntentStore, origin list, bootstrap token and port. IntentService takes a replaceable IntentProvider. VertexIntentProvider accepts injected fetch and credential suppliers for testing. HTTP route code has no prompt formatting knowledge.
+createApp accepts a ContextBuilder, IntentService, EphemeralIntentStore, origin list, bootstrap token and port. IntentService takes a replaceable IntentProvider. XpikiIntentProvider accepts injected fetch for testing; the older Vertex adapter remains separately testable. HTTP route code has no prompt formatting knowledge.
 
 If a teammate introduces session routes, reuse the same store or adapt their lifecycle to its invalidation semantics. Avoid separate stores with inconsistent pause/delete behavior. Keep origin/token protection when mounting routes. Bind only 127.0.0.1; hosts must match localhost/127.0.0.1 and the configured port.

@@ -1,6 +1,26 @@
 # KBC Assist POC
 
-Backend for **items 6–9**: build short-lived sanitized context, interpret intent through Vertex AI, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, notifications are separate team responsibilities.
+## Full project scaffold
+
+The existing backend remains in place. The frontend shell and Rust privacy boundary run alongside it as one Docker Compose stack:
+
+```sh
+node scripts/setup-local.mjs
+docker compose up --build -d
+```
+
+Open http://localhost:5173. See [Docker setup](docs/docker.md), [component map](docs/architecture.md), and [contributing](CONTRIBUTING.md).
+
+- `web/`: React + Vite shell; teammates can add the capture and KBC screens.
+- `src/`: existing Bun + Elysia context/intent backend and session lifecycle.
+- `services/privacy/`: Rust transport scaffold. Sanitization returns 503 until the real detector is connected.
+- `kbc-services.json`: mock catalogue for the service matcher.
+
+Containers can start without AI credentials; analysis returns uncertainty until an Xpiki API key is configured. This scaffold is not a completed end-to-end demo. Source remains under the [all-rights-reserved license](LICENSE); third-party code keeps its own license.
+
+## Existing intent backend
+
+Backend for **items 6–9**: build short-lived sanitized context, interpret intent through a fast Xpiki vision model, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, notifications remain separate team responsibilities.
 
 ## Install and run
 
@@ -8,22 +28,22 @@ Requires Node.js 22+. The project includes a local Bun executable, so a global B
 
 ```sh
 npm install --no-package-lock
-cp .env.example .env
+node scripts/setup-local.mjs
 ```
 
-Generate a random local pairing token and paste it into SESSION_TOKEN in .env:
+The setup helper creates a private `.env` with a random local pairing token and never overwrites an existing file. If you prefer to create it manually, use:
 
 ```sh
 node -e 'console.log(require("node:crypto").randomBytes(32).toString("hex"))'
 ```
 
-This is a local pairing token, not a Google credential. Enter it in the future local consent UI or a trusted API client; do not embed it in frontend source or log it. Configure Google credentials following [cloud setup](docs/cloud-setup.md), then run:
+This is a local pairing token, not an AI credential. Enter it in the future local consent UI or a trusted API client; do not embed it in frontend source or log it. Set `XPIKI_API_KEY` in `.env` for live analysis, then run:
 
 ```sh
 npm run dev
 ```
 
-Bun loads .env. The server listens at http://127.0.0.1:3000. GET /health returns a status object. ALLOWED_ORIGINS defaults to http://localhost:5173. Without Google configuration, analysis returns an uncertain result; there is no fake successful AI fallback.
+Bun loads .env. The server listens at http://127.0.0.1:3000. GET /health returns a status object. ALLOWED_ORIGINS defaults to http://localhost:5173. Without Xpiki configuration, analysis returns an uncertain result; there is no fake successful AI fallback.
 
 ## Integration
 
@@ -34,7 +54,7 @@ Read [the API contract](docs/integration.md). Session startup requires the local
 | POST /api/session/start  | Require pairing token and consent; issue session credentials |
 | POST /api/intent/analyze | Accept already-sanitized frames; return only IntentResult    |
 | GET /api/context         | Return the current intent or null                            |
-| POST /api/session/pause  | Abort pending work, retain context, reject new analysis       |
+| POST /api/session/pause  | Abort pending work, retain context, reject new analysis      |
 | POST /api/session/resume | Allow processing again in an unexpired session               |
 | DELETE /api/context      | Clear results and invalidate pending work                    |
 | POST /api/session/stop   | Revoke and remove the session                                |
@@ -52,7 +72,7 @@ npm test
 npm run smoke
 ```
 
-Tests mock Vertex and credentials. The smoke test starts the actual Bun/Elysia server on a temporary loopback port and checks session controls without cloud calls. CI runs the same checks. Authored modules remain below 500 lines. The generated Bun lockfile is the dependency pinning source; use bun install --frozen-lockfile when Bun is installed.
+Tests mock the provider and credentials. The smoke test starts the actual Bun/Elysia server on a temporary loopback port and checks session controls without cloud calls. CI runs the same checks. Authored modules remain below 500 lines. The generated Bun lockfile is the dependency pinning source; use bun install --frozen-lockfile when Bun is installed.
 
 ## Privacy and limits
 
@@ -68,7 +88,7 @@ Tests mock Vertex and credentials. The smoke test starts the actual Bun/Elysia s
 
 Items 1–5 were absent when this backend was built. The adapter boundary is documented and tested with mocks; live OCR/masking and the complete UI flow remain to be integrated. The separate Interdict repository was inspected read-only and was not changed or copied.
 
-Live Vertex availability, IAM, latency and recognition are unverified without a configured Google project. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.
+Live Xpiki availability, credentials, latency and recognition are unverified without a configured account. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.
 
 ## Context and recommendations (components 8–9)
 
