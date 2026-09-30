@@ -39,10 +39,10 @@ type SanitizedInput = {
 ```
 
 - Timestamps must use canonical UTC new Date().toISOString(). Future and expired frames are excluded.
-- Images are optional plain base64 PNGs without data-URL prefixes. Item 5 must mask, downscale to at most 1024 × 1024, and export a fresh Canvas PNG. Decoded size is limited to 1,200,000 bytes. Text/EXIF metadata is rejected. Text-only frames are valid.
+- Images are optional plain base64 PNGs without data-URL prefixes. Item 5 must mask, downscale to at most 1024 × 1024, and export an 8-bit RGB/RGBA, non-interlaced Canvas PNG. CRCs, chunk ordering and lengths, bounded pixel decompression and row filters are validated. Only IHDR, IDAT, IEND and fixed-size sRGB/gAMA/cHRM color chunks are allowed; palettes and other ancillary chunks are rejected. This validates representation, not pixel redaction. Decoded size is limited to 1,200,000 bytes. Text/EXIF metadata is rejected. Text-only frames are valid.
 - safeText is already-filtered OCR. Boundary-policy violations discard the whole frame. This conservative guard is not a replacement for Interdict.
 - OCR confidence, when present, is normalized 0–1 and must be at least 0.8. Omission assumes item 5 enforced its threshold. Normalize libraries using a 0–100 scale upstream.
-- Unknown properties are excluded. No usable frames returns a typed error. Only the newest three usable frames in the requested window (maximum 60 seconds) survive.
+- Unknown properties are excluded. No usable frames returns a typed error. Repeated IDs keep the newest valid, in-window occurrence (input order breaks timestamp ties). Only the newest three usable frames in the requested window (maximum 60 seconds) survive.
 - The test fixtures are unit-test data, not a live OCR fallback. Refresh their timestamps/session IDs in tests. Product fixture mode must be clearly labelled and tied to its exact prepared screenshot upstream.
 
 ## Output and errors
@@ -66,3 +66,13 @@ GET /api/context returns an object with intent equal to IntentResult or null. Er
 createApp accepts a ContextBuilder, IntentService, EphemeralIntentStore, origin list, bootstrap token and port. IntentService takes a replaceable IntentProvider. XpikiIntentProvider accepts injected fetch for testing; the older Vertex adapter remains separately testable. HTTP route code has no prompt formatting knowledge.
 
 If a teammate introduces session routes, reuse the same store or adapt their lifecycle to its invalidation semantics. Avoid separate stores with inconsistent pause/delete behavior. Keep origin/token protection when mounting routes. Bind only 127.0.0.1; hosts must match localhost/127.0.0.1 and the configured port.
+
+## Upload and storage boundaries
+
+The session is reserved before body reading, so overlapping uploads also return BUSY (409). Pause/delete/stop cancel outstanding upload streams immediately. Uploads have a ten-second total deadline (UPLOAD_TIMEOUT, 408); client disconnects cancel body reading. Invalid or cancelled requests release their lease so fresh requests can proceed. Stop revokes credentials; an interrupted upload then returns 401.
+
+GET /api/context returns { sessionId, intent, expiresAt, paused }; expiresAt is null without retained context. GET /api/services/recommendation returns { recommendation, alternatives, matched }. A recommendation contains serviceId, name, category, path, type, requiresAuthentication and reason. No match returns { recommendation: null, alternatives: [], matched: false }. Paused sessions retain context but suppress recommendations. Both routes require session authentication.
+
+Catalogue types and intents must belong to the reviewed sets in src/catalogue/vocabulary.ts. The catalogue covers more demo categories than the model's current single intent. Transaction entries cannot be recommended. New types or intents require vocabulary and test updates.
+
+Direct ContextStore.set callers must capture createdAt before async work. Writes created at or before pause/delete are rejected after resume. Use beginUpdate/commitUpdate for fresh work in the same millisecond; cancelUpdate releases only its matching lease.

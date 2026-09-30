@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { KbcService } from "./types.js";
+import { catalogueTypes, catalogueIntents } from "./vocabulary.js";
 
 export class CatalogueError extends Error {
   constructor(readonly code: "CATALOGUE_UNAVAILABLE" | "CATALOGUE_INVALID") {
@@ -49,12 +50,16 @@ export function loadCatalogue(
       !service.category.trim() ||
       typeof service.type !== "string" ||
       !service.type.trim() ||
+      !catalogueTypes.has(service.type) ||
       typeof service.path !== "string" ||
       !/^\/[A-Za-z0-9][A-Za-z0-9_./-]*$/.test(service.path) ||
       service.path.includes("..") ||
       service.path.includes("//") ||
       typeof service.requiresAuthentication !== "boolean" ||
       !strings("intents") ||
+      !(service.intents as string[]).every((intent) =>
+        catalogueIntents.has(intent),
+      ) ||
       !Array.isArray(service.keywords) ||
       !service.keywords.every(
         (k) => typeof k === "string" && k.trim().length > 0,

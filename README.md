@@ -78,9 +78,9 @@ Tests mock the provider and credentials. The smoke test starts the actual Bun/El
 
 - Newest three usable frames, at most 60 seconds old. Incoming windows may be narrower.
 - Up to 1.2 MB decoded PNG per image, 4 MB total context JSON, 4.5 MB HTTP body, 20 incoming frames, 20 text entries per frame and 240 characters per text entry.
-- Item 5 must mask and downscale images to at most 1024 × 1024 before submission. PNG metadata is rejected. This builder does not perform OCR or pixel redaction.
+- Item 5 must mask and downscale images to at most 1024 × 1024 before submission. PNG CRCs, structure and bounded pixel decompression are checked. Only 8-bit RGB/RGBA non-interlaced PNGs with fixed-size color chunks are accepted; palettes and other ancillary chunks are rejected. This builder does not perform OCR or pixel redaction.
 - Only structured intents and minimal session credentials/control state are stored. Everything is memory-only and expires after five minutes, with cleanup every ten seconds. Restart clears all state.
-- Pause, delete and stop abort pending requests and discard late results. AI failure clears earlier suggestions.
+- Pause, delete and stop abort pending uploads and provider requests and discard late results. AI failure clears earlier suggestions.
 - Conservative text guards catch common sensitive-value mistakes. **These guards and PNG checks do not prove arbitrary input is PII-free.** Use only synthetic demo data that passed the upstream privacy pipeline.
 - Fixed output vocabulary prevents copied account values, names and arbitrary descriptions from reaching clients. Confidence is a demo heuristic, not a calibrated probability.
 

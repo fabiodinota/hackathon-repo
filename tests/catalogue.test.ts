@@ -168,3 +168,26 @@ it("freezes nested catalogue arrays", () => {
   expect(Object.isFrozen(services[0].keywords)).toBe(true);
   expect(() => (services[0].intents as string[]).push("changed")).toThrow();
 });
+it.each(["Transaction", "transaction ", "unknown"])(
+  "rejects noncanonical service type %s",
+  (type) => {
+    const directory = mkdtempSync(join(tmpdir(), "kbc-catalogue-"));
+    directories.push(directory);
+    const path = join(directory, "catalogue.json");
+    const service = { ...loadCatalogue()[0], type };
+    writeFileSync(path, JSON.stringify({ services: [service] }));
+    expect(() => loadCatalogue(path)).toThrow("CATALOGUE_INVALID");
+  },
+);
+it("rejects unknown catalogue intents", () => {
+  const directory = mkdtempSync(join(tmpdir(), "kbc-catalogue-"));
+  directories.push(directory);
+  const path = join(directory, "catalogue.json");
+  writeFileSync(
+    path,
+    JSON.stringify({
+      services: [{ ...loadCatalogue()[0], intents: ["typo_intent"] }],
+    }),
+  );
+  expect(() => loadCatalogue(path)).toThrow("CATALOGUE_INVALID");
+});

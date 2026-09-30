@@ -30,15 +30,15 @@ it.each(["delete", "pause-resume", "stop"])(
       timeWindowSeconds: 60,
       frames: [frame()],
     });
-    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    let cancelled = false;
     let reading!: () => void;
     const ready = new Promise<void>((resolve) => {
       reading = resolve;
     });
     const stream = new ReadableStream<Uint8Array>(
       {
-        start(value) {
-          controller = value;
+        cancel() {
+          cancelled = true;
         },
         pull() {
           reading();
@@ -58,6 +58,15 @@ it.each(["delete", "pause-resume", "stop"])(
       new Request("http://localhost:3000/api/intent/analyze", init),
     );
     await ready;
+    const duplicate = await app.handle(
+      new Request("http://localhost:3000/api/intent/analyze", {
+        method: "POST",
+        headers,
+        body: payload,
+      }),
+    );
+    expect(duplicate.status).toBe(409);
+    expect(await duplicate.json()).toEqual({ error: "BUSY" });
     const path =
       action === "delete"
         ? "/api/context"
@@ -78,8 +87,7 @@ it.each(["delete", "pause-resume", "stop"])(
       );
       expect(resumed.status).toBe(200);
     }
-    controller.enqueue(new TextEncoder().encode(payload));
-    controller.close();
+    expect(cancelled).toBe(true);
     const rejected = await pending;
     expect(rejected.status).toBe(action === "stop" ? 401 : 409);
     expect(await rejected.json()).toEqual({

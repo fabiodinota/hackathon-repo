@@ -42,17 +42,28 @@ export class ContextBuilder {
     const window = Math.min(input.timeWindowSeconds, this.policy.maxSeconds);
     const valid = input.frames
       .map((frame) => this.frame(frame))
-      .filter((f): f is ModelFrame => !!f)
+      .filter((f): f is ModelFrame & { id: string } => !!f)
       .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
     if (!valid.length)
       throw new PipelineError("EMPTY_CONTEXT", "No usable sanitized frames.");
+    const seen = new Set<string>();
     const frames = valid
       .filter(
         (f) =>
           Date.parse(f.timestamp) >= now - window * 1000 &&
           Date.parse(f.timestamp) <= now,
       )
-      .slice(0, this.policy.maxFrames);
+      .filter((frame) => {
+        if (seen.has(frame.id)) return false;
+        seen.add(frame.id);
+        return true;
+      })
+      .slice(0, this.policy.maxFrames)
+      .map(({ safeText, timestamp, imageBase64 }) => ({
+        safeText,
+        timestamp,
+        ...(imageBase64 ? { imageBase64 } : {}),
+      }));
     if (!frames.length)
       throw new PipelineError("EXPIRED_SESSION", "Context expired.");
     const context = {
@@ -66,7 +77,7 @@ export class ContextBuilder {
       throw new PipelineError("PAYLOAD_TOO_LARGE", "Context too large.");
     return context;
   }
-  private frame(value: unknown): ModelFrame | undefined {
+  private frame(value: unknown): (ModelFrame & { id: string }) | undefined {
     if (!value || typeof value !== "object") return;
     const f = value as Record<string, unknown>;
     if (
@@ -115,6 +126,7 @@ export class ContextBuilder {
       return;
     if (!safeText.length && !f.imageBase64) return;
     return {
+      id: f.id,
       safeText,
       timestamp: f.timestamp,
       ...(f.imageBase64 ? { imageBase64: f.imageBase64 as string } : {}),

@@ -117,3 +117,12 @@ it("does not send any context without a key", async () => {
   ).toBe(true);
   expect(fetcher).not.toHaveBeenCalled();
 });
+it("rejects unapproved endpoints", async () => {
+  const fetcher = vi.fn() as unknown as typeof fetch;
+  const result = await new XpikiIntentProvider(
+    { ...config, baseUrl: "https://evil.example/v1" },
+    { fetch: fetcher },
+  ).analyze(context());
+  expect(result.uncertain).toBe(true);
+  expect(fetcher).not.toHaveBeenCalled();
+});

@@ -63,6 +63,7 @@ export class XpikiIntentProvider implements IntentProvider {
     } catch {
       return uncertainResult();
     } finally {
+      controller.abort();
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
     }
@@ -73,7 +74,7 @@ export class XpikiIntentProvider implements IntentProvider {
   ): Promise<IntentResult> {
     if (
       !this.config.apiKey ||
-      !/^https:\/\//.test(this.config.baseUrl) ||
+      !approvedEndpoint(this.config.baseUrl) ||
       !/^[a-zA-Z0-9.-]+$/.test(this.config.model)
     )
       return uncertainResult();
@@ -111,6 +112,7 @@ export class XpikiIntentProvider implements IntentProvider {
       this.config.baseUrl.replace(/\/$/, "") + "/responses",
       {
         method: "POST",
+        redirect: "error",
         signal,
         headers: {
           authorization: "Bearer " + this.config.apiKey,
@@ -139,14 +141,23 @@ export class XpikiIntentProvider implements IntentProvider {
         }),
       },
     );
-    if (!response.ok) return uncertainResult();
+    if (!response.ok) {
+      await response.body?.cancel();
+      return uncertainResult();
+    }
     const reader = response.body?.getReader();
     if (!reader) return uncertainResult();
+    const cancelRead = () => {
+      void reader.cancel().catch(() => {});
+    };
+    signal.addEventListener("abort", cancelRead, { once: true });
+    if (signal.aborted) cancelRead();
     const chunks: Uint8Array[] = [];
     let size = 0;
     try {
       while (true) {
         const next = await reader.read();
+        if (signal.aborted) return uncertainResult();
         if (next.done) break;
         size += next.value.length;
         if (size > 32768) {
@@ -156,6 +167,7 @@ export class XpikiIntentProvider implements IntentProvider {
         chunks.push(next.value);
       }
     } finally {
+      signal.removeEventListener("abort", cancelRead);
       reader.releaseLock();
     }
     const data = JSON.parse(Buffer.concat(chunks).toString()) as {
@@ -183,5 +195,21 @@ export class XpikiIntentProvider implements IntentProvider {
       .map((part) => part.text ?? "")
       .join("");
     return validateIntent(text, this.config.threshold);
+  }
+}
+
+function approvedEndpoint(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.origin === "https://api.xpiki.com" &&
+      ["/v1", "/v1/"].includes(url.pathname) &&
+      !url.username &&
+      !url.password &&
+      !url.search &&
+      !url.hash
+    );
+  } catch {
+    return false;
   }
 }

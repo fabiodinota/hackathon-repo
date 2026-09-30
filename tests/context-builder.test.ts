@@ -11,6 +11,21 @@ describe("ContextBuilder", () => {
         .frames.map((f) => f.timestamp),
     ).toEqual([frame(1), frame(2), frame(3)].map((f) => f.timestamp));
   });
+  it("deduplicates repeated frame ids before applying the frame cap", () => {
+    const result = builder().build(
+      input([
+        frame(1, { id: "same", safeText: ["first"] }),
+        frame(2, { id: "same", safeText: ["duplicate"] }),
+        frame(3, { id: "other", safeText: ["second"] }),
+        frame(4, { id: "third", safeText: ["third"] }),
+      ]),
+    );
+    expect(result.frames.map((value) => value.safeText)).toEqual([
+      ["first"],
+      ["second"],
+      ["third"],
+    ]);
+  });
   it("caps windows at 60 seconds and excludes every expired frame", () => {
     const result = builder().build({
       ...input([frame(1), frame(61)]),
@@ -94,6 +109,15 @@ describe("ContextBuilder", () => {
     ).toThrow();
     const bytes = Buffer.from(png, "base64");
     bytes.write("tEXt", 37);
+    expect(() =>
+      builder().build(
+        input([frame(1, { imageBase64: bytes.toString("base64") })]),
+      ),
+    ).toThrow();
+  });
+  it("rejects malformed chunk lengths and CRCs", () => {
+    const bytes = Buffer.from(png, "base64");
+    bytes[29] ^= 255;
     expect(() =>
       builder().build(
         input([frame(1, { imageBase64: bytes.toString("base64") })]),

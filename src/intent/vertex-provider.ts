@@ -58,6 +58,7 @@ export class VertexIntentProvider implements IntentProvider {
     } catch {
       return uncertainResult();
     } finally {
+      controller.abort();
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
     }
@@ -122,6 +123,7 @@ export class VertexIntentProvider implements IntentProvider {
         });
     const response = await this.fetcher(endpoint, {
       method: "POST",
+      redirect: "error",
       signal,
       headers: {
         authorization: "Bearer " + token,
@@ -151,15 +153,24 @@ export class VertexIntentProvider implements IntentProvider {
         },
       }),
     });
-    if (!response.ok) return uncertainResult();
+    if (!response.ok) {
+      await response.body?.cancel();
+      return uncertainResult();
+    }
     // Bounded response read; never log or persist provider bodies.
     const reader = response.body?.getReader();
     if (!reader) return uncertainResult();
+    const cancelRead = () => {
+      void reader.cancel().catch(() => {});
+    };
+    signal.addEventListener("abort", cancelRead, { once: true });
+    if (signal.aborted) cancelRead();
     const chunks: Uint8Array[] = [];
     let size = 0;
     try {
       while (true) {
         const next = await reader.read();
+        if (signal.aborted) return uncertainResult();
         if (next.done) break;
         size += next.value.length;
         if (size > 32768) {
@@ -169,6 +180,7 @@ export class VertexIntentProvider implements IntentProvider {
         chunks.push(next.value);
       }
     } finally {
+      signal.removeEventListener("abort", cancelRead);
       reader.releaseLock();
     }
     const data = JSON.parse(Buffer.concat(chunks).toString()) as {

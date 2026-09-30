@@ -5,3 +5,5 @@ Set XPIKI_API_KEY in the private backend .env. Defaults are XPIKI_BASE_URL=https
 The backend uses the Responses API with strict JSON output, masked PNG inputs, and reasoning disabled for fast intent classification. A synthetic text classification took about 3.3 seconds with reasoning disabled in one local check; latency varies with provider load. Luna is a latency-oriented default, not a proven quality winner across every model.
 
 Only reconstructed sanitized text and masked PNGs are sent to XPIKI. Requests set store=false; that flag does not establish the provider's retention policy. Timeouts, HTTP failures, refusals, incomplete responses and invalid JSON return uncertainty. Tests mock transport. Live verification uses synthetic sanitized context.
+
+The adapter only accepts https://api.xpiki.com/v1 (with an optional trailing slash), without URL credentials, query parameters or fragments. Other destinations fail closed before sending context; changing destinations requires a reviewed code change. Both Xpiki and Vertex reject redirects, cancel HTTP error bodies and abort transport when processing finishes or times out.

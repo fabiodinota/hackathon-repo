@@ -27,6 +27,8 @@ export function matchesToken(value: string, expected: string): boolean {
 export async function readJson(
   request: Request,
   limit: number,
+  signal?: AbortSignal,
+  timeoutMs = 10000,
 ): Promise<unknown> {
   if (
     request.headers.get("content-type")?.split(";")[0].trim() !==
@@ -39,13 +41,36 @@ export async function readJson(
   if (!reader) throw new HttpError("INVALID_INPUT", 400);
   const chunks: Uint8Array[] = [];
   let bytes = 0;
+  let failure: HttpError | undefined;
+  let rejectRead!: (error: HttpError) => void;
+  const stopped = new Promise<never>((_, reject) => {
+    rejectRead = reject;
+  });
+  const stop = (error: HttpError) => {
+    if (failure) return;
+    failure = error;
+    chunks.length = 0;
+    rejectRead(error);
+    void reader.cancel().catch(() => {});
+  };
+  const abort = () => stop(new HttpError("STALE_REQUEST", 409));
+  const disconnect = () => stop(new HttpError("INVALID_INPUT", 400));
+  signal?.addEventListener("abort", abort, { once: true });
+  request.signal.addEventListener("abort", disconnect, { once: true });
+  const timer = setTimeout(
+    () => stop(new HttpError("UPLOAD_TIMEOUT", 408)),
+    timeoutMs,
+  );
+  if (signal?.aborted) abort();
+  if (request.signal.aborted) disconnect();
   try {
     while (true) {
-      const next = await reader.read();
+      const next = await Promise.race([reader.read(), stopped]);
+      if (failure) throw failure;
       if (next.done) break;
       bytes += next.value.length;
       if (bytes > limit) {
-        await reader.cancel();
+        void reader.cancel().catch(() => {});
         throw new HttpError("PAYLOAD_TOO_LARGE", 413);
       }
       chunks.push(next.value);
@@ -56,6 +81,10 @@ export async function readJson(
       throw new HttpError("INVALID_INPUT", 400);
     }
   } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", abort);
+    request.signal.removeEventListener("abort", disconnect);
+    chunks.length = 0;
     reader.releaseLock();
   }
 }

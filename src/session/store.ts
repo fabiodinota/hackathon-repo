@@ -87,13 +87,20 @@ export class EphemeralIntentStore {
     if (session.paused) throw new SessionError("SESSION_PAUSED");
     if (session.pending) throw new SessionError("BUSY");
     const controller = new AbortController();
+    const contextUpdate = this.contexts.beginUpdate(id);
     session.pending = controller;
     return {
       id,
       signal: controller.signal,
       controller,
-      contextUpdate: this.contexts.beginUpdate(id),
+      contextUpdate,
     };
+  }
+  release(lease: ProcessingLease): void {
+    const session = this.sessions.get(lease.id);
+    if (session?.pending === lease.controller) session.pending = undefined;
+    lease.controller.abort();
+    this.contexts.cancelUpdate(lease.contextUpdate);
   }
   finish(lease: ProcessingLease, result: IntentResult): IntentResult {
     const session = this.sessions.get(lease.id);

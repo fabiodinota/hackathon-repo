@@ -1,3 +1,4 @@
+import { catalogueTypes } from "./vocabulary.js";
 import { allowedSignals } from "../intent/vocabulary.js";
 import type { IntentResult } from "../intent/types.js";
 import type {
@@ -54,7 +55,10 @@ export class CatalogueMatcher implements ServiceMatcher {
       )
       .map(normalize);
     const ranked = services
-      .filter((service) => service.type !== "transaction")
+      .filter(
+        (service) =>
+          catalogueTypes.has(service.type) && service.type !== "transaction",
+      )
       .map((service, index) => {
         const exact = service.intents.includes(intent.intent as string);
         const keywordHits = service.keywords.reduce(

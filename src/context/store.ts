@@ -10,6 +10,7 @@ export type ContextUpdate = {
 export interface ContextStore {
   beginUpdate(sessionId: string): ContextUpdate;
   commitUpdate(update: ContextUpdate, context: StoredContext): boolean;
+  cancelUpdate(update: ContextUpdate): void;
   /** createdAt must be captured before any asynchronous processing begins. */
   set(sessionId: string, context: StoredContext): void;
   get(sessionId: string): StoredContext | null;
@@ -65,6 +66,10 @@ export class EphemeralContextStore implements ContextStore {
     this.pending.delete(update.sessionId);
     this.write(update.sessionId, context, true);
     return true;
+  }
+  cancelUpdate(update: ContextUpdate): void {
+    if (this.pending.get(update.sessionId)?.token === update.token)
+      this.pending.delete(update.sessionId);
   }
   set(sessionId: string, context: StoredContext): void {
     this.write(sessionId, context, false);
@@ -127,6 +132,7 @@ export class EphemeralContextStore implements ContextStore {
   }
   pause(sessionId: string): void {
     this.assertSessionId(sessionId);
+    this.tombstones.set(sessionId, this.now());
     this.paused.set(sessionId, this.now() + this.ttlMs);
     this.pending.delete(sessionId);
   }

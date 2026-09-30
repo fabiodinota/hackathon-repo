@@ -14,16 +14,27 @@ export function intentRoutes(deps: IntentRouteDependencies) {
     "/api/intent/analyze",
     async ({ request }) => {
       const sessionId = request.headers.get("x-session-id") ?? "";
-      // Delete/pause can happen while a large upload is still being read.
-      // The generation check below rejects that stale request before analysis.
+      // Reserve the session before reading; controls cancel uploads as well as AI.
       const generation = deps.store.authorize(sessionId, bearer(request));
-      const input = (await readJson(request, 4_500_000)) as SanitizedInput;
-      if (!input || input.sessionId !== sessionId)
-        throw new HttpError("INVALID_INPUT", 400);
-      const context = deps.builder.build(input);
       const lease = deps.store.begin(sessionId, generation);
-      const result = await deps.service.analyze(context, lease.signal);
-      return json(deps.store.finish(lease, result));
+      try {
+        const input = (await readJson(
+          request,
+          4_500_000,
+          lease.signal,
+        )) as SanitizedInput;
+        if (!input || input.sessionId !== sessionId)
+          throw new HttpError("INVALID_INPUT", 400);
+        const context = deps.builder.build(input);
+        const result = await deps.service.analyze(context, lease.signal);
+        return json(deps.store.finish(lease, result));
+      } catch (error) {
+        if (lease.signal.aborted)
+          deps.store.authorize(sessionId, bearer(request));
+        throw error;
+      } finally {
+        deps.store.release(lease);
+      }
     },
     { parse: "none" },
   );
