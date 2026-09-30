@@ -1,0 +1,109 @@
+.frames-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 900px;
+}
+.frame-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 410px;
+  width: 410px;
+}
+.frame-label {
+  margin: 0;
+  color: #526c84;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.frame-column .phone-frame {
+  flex-shrink: 0;
+  width: 100%;
+}
+.car-site-spacer {
+  display: block;
+  width: 31px;
+  height: 31px;
+}
+@media (max-width: 900px) {
+  .frames-row {
+    gap: 18px;
+  }
+  .frame-column .phone-frame {
+    width: min(100%, 410px);
+  }
+}
+@media (max-width: 900px) {
+  .app-shell {
+    display: block;
+    overflow-x: auto;
+    padding: 20px 12px;
+  }
+  .frames-row {
+    width: max-content;
+    justify-content: flex-start;
+    gap: 22px;
+  }
+  .frame-column {
+    flex-basis: 360px;
+    width: 360px;
+  }
+  .frame-column .phone-frame {
+    width: 360px;
+  }
+  .frame-column .phone-screen {
+    height: 760px;
+    min-height: 0;
+  }
+}
+.home-overview {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid #d9e1e9;
+  border-radius: 12px;
+  background: #fff;
+}
+.home-overview h2 {
+  margin: 0 0 16px;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.overview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.overview-row div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+  border-radius: 8px;
+  background: #f3f6f8;
+}
+.overview-row strong {
+  font-size: 17px;
+}
+.overview-row span {
+  color: #687b90;
+  font-size: 10px;
+}
+.context-heading {
+  margin-bottom: 25px;
+}
+.context-heading h1 {
+  margin: 0 0 7px;
+  font-size: 29px;
+  letter-spacing: -0.05em;
+}
+.context-heading > p:last-child {
+  margin: 0;
+  color: #687b90;
+  font-size: 12px;
+  line-height: 1.5;
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" role="img" aria-labelledby="title desc">
+  <title id="title">Blue electric compact SUV</title><desc id="desc">A stylized blue electric compact SUV shown from the side.</desc>
+  <defs><linearGradient id="body" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#2879cf"/><stop offset="1" stop-color="#0754a3"/></linearGradient><linearGradient id="glass" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#c9ecff"/><stop offset="1" stop-color="#5ca4d7"/></linearGradient></defs>
+  <rect width="800" height="420" rx="28" fill="#f3e2cf"/><ellipse cx="395" cy="343" rx="285" ry="21" fill="#c8aa87" opacity=".45"/>
+  <path d="M124 291c6-50 40-83 91-93l73-14 73-76c16-17 38-26 61-26h81c31 0 60 14 79 39l46 60 42 17c34 13 55 45 55 81v30c0 16-13 29-29 29H150c-16 0-29-13-26-29Z" fill="url(#body)"/>
+  <path d="m295 177 70-71c12-12 28-19 45-19h77c23 0 45 10 59 28l45 58-296 4Z" fill="url(#glass)" stroke="#b4dcf3" stroke-width="4"/>
+  <path d="m424 91-1 84M488 91l8 84" stroke="#2b6d9e" stroke-width="4" opacity=".8"/><path d="M142 250h591" stroke="#6bb1e6" stroke-width="5" opacity=".65"/><circle cx="237" cy="307" r="49" fill="#163b64"/><circle cx="237" cy="307" r="26" fill="#d5e4ef"/><circle cx="237" cy="307" r="12" fill="#7090aa"/><circle cx="621" cy="307" r="49" fill="#163b64"/><circle cx="621" cy="307" r="26" fill="#d5e4ef"/><circle cx="621" cy="307" r="12" fill="#7090aa"/>
+  <path d="M136 248h25c15 0 24 18 13 29l-25 24h-16c-4-19-2-36 3-53ZM720 245h18c11 10 18 25 19 42-4 7-11 9-20 9h-13l-13-24c-6-12-2-22 9-27Z" fill="#ffdc7a"/><path d="M192 220h39" stroke="#bce4ff" stroke-width="10" stroke-linecap="round"/><circle cx="670" cy="207" r="7" fill="#bce4ff"/>
+</svg>

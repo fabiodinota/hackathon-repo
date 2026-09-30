@@ -14,8 +14,14 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
+      - run: bun install --frozen-lockfile
+        working-directory: web
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
       - run: npm run smoke
+      - run: npm run build
+        working-directory: web
+      - run: npm test
+        working-directory: web
