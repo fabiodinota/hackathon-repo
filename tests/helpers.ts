@@ -1,7 +1,7 @@
 import type { SanitizedInput, SanitizedFrame } from "../src/context/types.js";
 import type { IntentResult } from "../src/intent/types.js";
 export const now = Date.parse("2026-09-30T12:00:00.000Z");
-export const id = "00000000-0000-4000-8000-000000000001";
+export const id = "session_1";
 export const frame = (
   age = 1,
   extra: Partial<SanitizedFrame> = {},
