@@ -1,5 +1,11 @@
 # KBC Assist
 
+[DEMO](kbc.46.224.58.19.sslip.io)
+(token needed for demo: b1f692aff0ad57a3ab1f88bb6341ac7f1e02a68e664f8017c3ec91d4f4276607)
+
+https://github.com/user-attachments/assets/0c5cc1c8-c012-4af5-ad50-01db45582154
+
+
 **Banking help based on what you are doing, with your permission.**
 
 KBC Assist helps customers find a banking service when it could be useful. Our demo follows someone shopping for an electric car. After they enable Assist, a KBC notification suggests a car loan. They can open the offer, see why it was suggested, or carry on browsing.
