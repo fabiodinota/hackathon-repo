@@ -11,7 +11,7 @@ docker compose up --build -d
 
 Open http://localhost:5173. See [Docker setup](docs/docker.md), [component map](docs/architecture.md), and [contributing](CONTRIBUTING.md).
 
-- `web/`: React + Vite shell; teammates can add the capture and KBC screens.
+- `web/`: React + Vite frontend with separate KBC and partner marketplace mobile frames. See [frontend setup and demo flow](web/README.md).
 - `src/`: existing Bun + Elysia context/intent backend and session lifecycle.
 - `services/privacy/`: Rust transport scaffold. Sanitization returns 503 until the real detector is connected.
 - `kbc-services.json`: mock catalogue for the service matcher.
@@ -20,7 +20,7 @@ Containers can start without AI credentials; analysis returns uncertainty until 
 
 ## Existing intent backend
 
-Backend for **items 6–9**: build short-lived sanitized context, interpret intent through a fast Xpiki vision model, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, notifications remain separate team responsibilities.
+Backend for **items 6–9**: build short-lived sanitized context, interpret intent through a fast Xpiki vision model, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, live frontend API integration, and notifications remain separate team responsibilities.
 
 ## Install and run
 
@@ -86,7 +86,7 @@ Tests mock the provider and credentials. The smoke test starts the actual Bun/El
 
 ## Remaining integration work
 
-Items 1–5 were absent when this backend was built. The adapter boundary is documented and tested with mocks; live OCR/masking and the complete UI flow remain to be integrated. The separate Interdict repository was inspected read-only and was not changed or copied.
+The frontend now demonstrates KBC Assist and a local partner order form. Assist uses a deterministic fixture; it does not call the backend. The adapter boundary is documented and tested with mocks; live capture, OCR/masking, consent sessions, and API integration remain to be connected. The separate Interdict repository was inspected read-only and was not changed or copied.
 
 Live Xpiki availability, credentials, latency and recognition are unverified without a configured account. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.
 

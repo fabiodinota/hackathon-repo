@@ -15,3 +15,10 @@ credentials*.json
 *service-account*.json
 **/target/
 .secrets/
+ai-context/
+agent.md
+frontend/
+aicontext/
+AGENTS.md
+agents.md
+.agents/
