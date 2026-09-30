@@ -89,6 +89,9 @@ export function mountActivity(root) {
       );
     } else if (event.status === "discarded") {
       clearPreview();
+      // A discarded frame never reached a validated redaction decision. Remove
+      // the raw diagnostic as well so failed processing cannot retain pixels.
+      clearCaptureProof();
       $("status").textContent = captureActive
         ? "Live · frame discarded"
         : "Frame discarded";

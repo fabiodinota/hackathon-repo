@@ -1,0 +1,39 @@
+/* An in-app notification, clipped to the partner phone's screen. */
+.marketplace-notification-slot {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  right: 10px;
+  z-index: 10;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+.marketplace-notification {
+  position: relative;
+  padding: 13px 15px 15px;
+  border: 1px solid #ffffffb3;
+  border-radius: 23px;
+  background: #f4f6f9ed;
+  color: #202630;
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  box-shadow: 0 10px 30px #152d4933, 0 2px 5px #152d4914;
+  pointer-events: auto;
+  animation: notification-arrive 650ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.notification-app { display: flex; align-items: center; gap: 7px; padding-right: 28px; color: #5b6370; font-size: 11px; font-weight: 500; }
+.notification-icon { display: grid; place-items: center; width: 23px; height: 23px; border-radius: 7px; background: #005eb8; color: #fff; font-weight: 800; font-size: 15px; }
+.notification-time { margin-left: auto; color: #727a86; font-size: 10px; font-weight: 400; }
+.notification-dismiss { position: absolute; top: 9px; right: 9px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #727a86; background: transparent; }
+.notification-dismiss:hover { background: #dfe5ec; }
+.notification-content { display: grid; gap: 5px; width: 100%; margin-top: 10px; padding: 0; color: inherit; background: transparent; text-align: left; font: inherit; }
+.notification-content strong { font-size: 14px; line-height: 1.4; font-weight: 650; letter-spacing: -.015em; }
+.notification-content > span { font-size: 12px; line-height: 1.5; color: #526070; }
+.notification-content .notification-action { display: flex; align-items: center; gap: 5px; margin-top: 4px; color: #005eb8; font-size: 11px; font-weight: 600; }
+@keyframes notification-arrive {
+  from { transform: translateY(calc(-100% - 24px)); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .marketplace-notification { animation: none; }
+}

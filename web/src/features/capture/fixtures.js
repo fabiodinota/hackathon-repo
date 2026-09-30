@@ -1,8 +1,8 @@
 // Screenshot and OCR share a single layout; all values are synthetic.
 const lines = [
-  ["NORTHSTAR / DEMO ONLY", null],
-  ["Planning a home purchase", null],
-  ["Compare mortgage options and monthly repayments", null],
+  ["DRIVELY / DEMO MARKETPLACE", null],
+  ["Looking for an electric car", null],
+  ["Compare models, range and monthly price", null],
   ["Email: alex@example.test", "EMAIL"],
   ["Phone: +44 20 1234 5678", "PHONE"],
   ["IBAN: BE68 5390 0754 7034", "IBAN"],
