@@ -1,0 +1,397 @@
+:root {
+  --ink: #182a3a;
+  --muted: #687b8a;
+  --line: #dfe6eb;
+  --mint: #1c8b75;
+  --pale: #e8f4f0;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f8fafb;
+  color: var(--ink);
+  font:
+    14px "DM Sans",
+    sans-serif;
+}
+.shell {
+  max-width: 1180px;
+  margin: auto;
+  padding: 0 28px 38px;
+}
+header {
+  height: 76px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+.brand {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.brand b {
+  display: inline-grid;
+  place-items: center;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  margin-right: 7px;
+  font-family: Georgia;
+}
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 66px 0 52px;
+}
+.eyebrow {
+  color: var(--mint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+.hero h1 {
+  font:
+    600 48px/1.08 "Playfair Display",
+    serif;
+  letter-spacing: -1.4px;
+  margin: 0 0 18px;
+}
+.hero h1 i {
+  color: var(--mint);
+}
+.lede {
+  max-width: 590px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0;
+}
+.seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 135px;
+  height: 135px;
+  border: 1px solid #b8ddd3;
+  border-radius: 50%;
+  color: var(--mint);
+  transform: rotate(8deg);
+  font-size: 30px;
+}
+.seal strong {
+  font-size: 13px;
+}
+.seal small {
+  font-size: 10px;
+  color: var(--muted);
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.card,
+.pipeline {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 6px 24px #182a3a06;
+}
+.heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+.heading > small {
+  color: #9caab4;
+  font-weight: 700;
+}
+.heading h2,
+.pipeline h2 {
+  font-size: 20px;
+  margin: 0;
+}
+.heading em {
+  margin-left: auto;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f4f6f7;
+  color: #7a8992;
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+}
+.heading em.good {
+  background: var(--pale);
+  color: var(--mint);
+}
+.copy {
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 23px 0;
+}
+.consent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.consent input {
+  position: absolute;
+  opacity: 0;
+}
+.consent span {
+  width: 34px;
+  height: 20px;
+  background: #cbd5da;
+  border-radius: 20px;
+  position: relative;
+}
+.consent span:after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.consent input:checked + span {
+  background: var(--mint);
+}
+.consent input:checked + span:after {
+  transform: translateX(14px);
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 27px;
+}
+button {
+  border: 0;
+  font: 600 12px "DM Sans";
+  border-radius: 7px;
+  padding: 12px 16px;
+  cursor: pointer;
+  background: #f3f5f6;
+  color: var(--ink);
+}
+button:first-child {
+  background: var(--ink);
+  color: #fff;
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.note {
+  color: #81919c;
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 24px;
+  padding-top: 17px;
+  border-top: 1px solid var(--line);
+}
+.preview {
+  position: relative;
+  height: 240px;
+  margin-top: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #fff;
+  color: var(--mint);
+  padding: 6px 9px;
+  border-radius: 5px;
+  box-shadow: 0 2px 8px #182a3a1a;
+  font-size: 10px;
+  font-weight: 700;
+}
+.hidden {
+  display: none;
+}
+.metrics {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 11px;
+  margin: 16px 0;
+}
+.metrics b {
+  color: var(--ink);
+  font-size: 15px;
+  margin-right: 3px;
+}
+.fixture {
+  background: transparent;
+  color: var(--mint);
+  padding: 0;
+  font-size: 11px;
+}
+.pipeline {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  align-items: center;
+  background: #f7f5ef;
+  border-color: #ebe7da;
+  margin: 18px 0;
+}
+.pipeline > div > p:last-child {
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 280px;
+}
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.steps > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 90px;
+}
+.steps b {
+  font-size: 10px;
+  color: #9caab4;
+}
+.steps strong {
+  font-size: 12px;
+}
+.steps small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.steps .active strong {
+  color: var(--mint);
+}
+.steps > i {
+  height: 1px;
+  background: #d8d8ce;
+  flex: 1;
+  margin: 0 12px;
+}
+.grid + .grid {
+  margin-top: 18px;
+}
+.log {
+  margin-top: 20px;
+  color: #9aa7af;
+  font-size: 12px;
+  padding-top: 10px;
+}
+.event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #edf0f2;
+  padding: 11px 0;
+}
+.event > span {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+}
+.event .redact {
+  background: #fff0e8;
+  color: #c26946;
+}
+.event .safe {
+  background: var(--pale);
+  color: var(--mint);
+}
+.event .discard {
+  background: #fff1e1;
+  color: #ad6c2b;
+}
+.event div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.event small,
+.event time {
+  color: var(--muted);
+  font-size: 10px;
+}
+.event time {
+  margin-left: auto;
+}
+.details ul {
+  list-style: none;
+  padding: 0;
+}
+.details li {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0;
+}
+.details li > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.details li > div small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+footer {
+  color: #9aa7af;
+  font-size: 10px;
+  margin-top: 28px;
+}
+@media (max-width: 800px) {
+  .hero {
+    padding: 40px 0;
+    display: block;
+  }
+  .seal {
+    display: none;
+  }
+  .hero h1 {
+    font-size: 39px;
+  }
+  .grid,
+  .pipeline {
+    grid-template-columns: 1fr;
+  }
+  .steps {
+    margin-top: 26px;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .steps > i {
+    display: none;
+  }
+}

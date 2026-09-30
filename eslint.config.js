@@ -8,6 +8,7 @@ export default [
       "coverage/**",
       "**/dist/**",
       "**/target/**",
+      "web/public/ocr/**",
     ],
   },
   {
@@ -19,7 +20,20 @@ export default [
         process: "readonly",
         fetch: "readonly",
         setTimeout: "readonly",
+        clearTimeout: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        TextEncoder: "readonly",
+        TextDecoder: "readonly",
+        document: "readonly",
+        window: "readonly",
+        navigator: "readonly",
+        performance: "readonly",
+        globalThis: "readonly",
+        innerWidth: "readonly",
+
         URL: "readonly",
+        Buffer: "readonly",
       },
     },
     rules: {

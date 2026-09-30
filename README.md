@@ -1,26 +1,25 @@
 # KBC Assist POC
 
-## Full project scaffold
+## Integrated local prototype
 
-The existing backend remains in place. The frontend shell and Rust privacy boundary run alongside it as one Docker Compose stack:
+The React/Vite frontend now contains the screen-consent prototype, with browser tab capture, local Tesseract OCR and opaque masking. The Rust service uses the pinned Interdict detector.
 
-```sh
-node scripts/setup-local.mjs
-docker compose up --build -d
-```
+- web/src/features/activity/: UI, consent, previews and activity log.
+- web/src/features/capture/: capture lifecycle and synthetic fixtures.
+- web/src/features/ocr/: local OCR and coordinate mapping.
+- web/src/features/privacy/: span validation, masking and inspection client.
+- services/privacy/: Rust Interdict adapter.
+- src/: existing Bun/Elysia context, intent and session backend.
 
-Open http://localhost:5173. See [Docker setup](docs/docker.md), [component map](docs/architecture.md), and [contributing](CONTRIBUTING.md).
+See [frontend setup](web/README.md), [privacy service](services/privacy/README.md), and [Docker setup](docs/docker.md).
 
-- `web/`: React + Vite shell; teammates can add the capture and KBC screens.
-- `src/`: existing Bun + Elysia context/intent backend and session lifecycle.
-- `services/privacy/`: Rust transport scaffold. Sanitization returns 503 until the real detector is connected.
-- `kbc-services.json`: mock catalogue for the service matcher.
+Run the stack with node scripts/setup-local.mjs followed by docker compose up --build -d, then open http://localhost:5173. OCR assets are generated during the web image build; no sibling Interdict checkout is required. Upstream source retains its original license.
 
-Containers can start without AI credentials; analysis returns uncertainty until an Xpiki API key is configured. This scaffold is not a completed end-to-end demo. Source remains under the [all-rights-reserved license](LICENSE); third-party code keeps its own license.
+The UI preserves local preview mode. It does not submit frames to cloud analysis. Its demo OCR gate is 40% overall, with no per-word rejection; the existing backend retains its 80% confidence contract. Notifications and the explicit-consent cloud adapter remain future integration work.
 
 ## Existing intent backend
 
-Backend for **items 6–9**: build short-lived sanitized context, interpret intent through a fast Xpiki vision model, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR, Interdict masking, React/Vite UI, notifications remain separate team responsibilities.
+Backend for **items 6–9**: build short-lived sanitized context, interpret intent through a fast Xpiki vision model, and return validated JSON. One Bun + Elysia + TypeScript server runs on loopback. Capture, OCR and Interdict masking are integrated locally. Notifications and cloud handoff remain separate integration work.
 
 ## Install and run
 
@@ -86,7 +85,7 @@ Tests mock the provider and credentials. The smoke test starts the actual Bun/El
 
 ## Remaining integration work
 
-Items 1–5 were absent when this backend was built. The adapter boundary is documented and tested with mocks; live OCR/masking and the complete UI flow remain to be integrated. The separate Interdict repository was inspected read-only and was not changed or copied.
+The local capture/OCR/masking pipeline is integrated. A future SanitizedInput adapter must connect successfully masked frames to the existing session lifecycle, with explicit cloud consent and a compatible OCR confidence policy. The current UI does not bypass or invoke that boundary.
 
 Live Xpiki availability, credentials, latency and recognition are unverified without a configured account. No screenshots, credentials, raw OCR or real personal data belong in Git. The tiny generated PNG in tests is a blank pixel, not a screenshot. Tests construct sensitive-looking synthetic values at runtime. The catalogue is mock data for a separate service matcher.
 

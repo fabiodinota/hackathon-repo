@@ -19,3 +19,7 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run smoke
+      - run: bun install --cwd web --frozen-lockfile
+      - run: npm --prefix web test
+      - run: npm --prefix web run prepare:ocr
+      - run: npm --prefix web run build

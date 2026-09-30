@@ -5,6 +5,8 @@ services:
     ports:
       - "127.0.0.1:${WEB_PORT:-5173}:8080"
     depends_on:
+      privacy:
+        condition: service_started
       api:
         condition: service_healthy
     read_only: true
@@ -12,7 +14,7 @@ services:
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
     init: true
-    networks: [app]
+    networks: [app, privacy]
   api:
     build: .
     environment:
@@ -33,6 +35,9 @@ services:
     networks: [app, privacy]
   privacy:
     build: ./services/privacy
+    environment:
+      HOST: 0.0.0.0
+      ALLOWED_ORIGINS: http://localhost:${WEB_PORT:-5173},http://127.0.0.1:${WEB_PORT:-5173}
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]

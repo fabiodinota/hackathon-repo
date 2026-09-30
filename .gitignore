@@ -15,3 +15,6 @@ credentials*.json
 *service-account*.json
 **/target/
 .secrets/
+
+web/public/ocr/
+web/artifacts/
