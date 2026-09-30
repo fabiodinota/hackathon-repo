@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+coverage/
+.DS_Store
+*.log
+/POC_PLAN.md
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.webp
+credentials*.json
+*service-account*.json
