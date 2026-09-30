@@ -1,34 +1,25 @@
-# KBC Assist frontend
+# KBC Assist
 
-React + Vite + TypeScript demo in the repository’s `web/` workspace. The backend remains in root `src/`, and the privacy service remains in `services/privacy/`.
+React + Vite + TypeScript mobile banking proof of concept for the KBC hackathon track.
 
 ## Run
 
-Use Node.js 22.12+ or Node.js 24. From `web/`:
+Requires Node.js 22.12+ or a recent Node.js 24 release.
 
-```sh
-bun install --frozen-lockfile
-npm run dev
-```
-
-If Bun is not global, `npx --yes bun@1.4.2 install --frozen-lockfile` uses the repository’s Bun version. Open http://127.0.0.1:5173. `npm run build` creates `dist/`, `npm run preview` serves it, and `npm test` runs the frontend interaction suite. Root `npm test` runs only backend tests. CI validates both components.
-
-The existing Vite proxy forwards `/api` and `/health` to port 3000. Docker Compose retains the existing Nginx frontend build and API proxy. The demo itself does not make backend requests.
+Install dependencies with npm install, then start with npm run dev. Open the local URL printed in the terminal. npm run build creates the production output; npm run preview serves that output. npm test runs the Assist behavior tests.
 
 ## Demo flow
 
-The page shows two separate, equally sized mobile frames. KBC Home has static banking content. Open Context, opt into Assist, and wait 1.1 seconds for a synthetic home-buying summary. View the checklist or explanation, inspect the exact context, dismiss the suggestion, pause requests, or delete context. Context expires after 15 minutes; refreshing resets consent and state.
+On entry, a Vaul drawer inside the KBC screen asks whether to enable context. Yes enables Assist immediately; No (or dismissing the drawer) leaves it off. The Context tab always lets you change the switch. After enabling, simulated car-shopping context appears after 1.1 seconds and suggests a KBC car loan. Explore KBC car loan opens a short service preview; it does not submit a loan application. Open the explanation, or choose Explore context to view the summary and exact payload on a separate preview screen. You can dismiss the suggestion, pause Assist, or delete context.
 
-The brown partner marketplace shows a car illustration, price, and Order now button. Its form accepts name, email, phone, postcode, and preferred delivery month for a future redaction demonstration. Continue validates required fields and shows a local completion view. It places no order and sends no data. Use synthetic input.
+Pause and delete cancel pending requests. Context expires after 15 minutes. Reload resets the session. Turning Assist off and on starts a fresh demo request. Banking navigation, balances, and quick actions are static previews.
 
-## Files and integration boundary
+The page renders two independent mobile frames side by side: the KBC banking app and the partner car marketplace. The car listing shows a locally served Volvo EX30 photograph, price, and Order now button. Its order form provides name, email, phone, postcode, and preferred delivery month for your future redaction pipeline. Continue validates the form and shows a local completion screen; it does not send, store, redact, or place an order. On narrow screens, the two frames remain horizontally scrollable so both screens stay separate.
 
-- `src/features/assistant/`: KBC screens, Assist cards, checklist, and explanation dialog.
-- `src/features/activity/`: partner car listing and local order form.
-- `src/components/PhoneFrame.tsx`: shared frame and banking navigation.
-- `src/App.tsx`: state machine and frame composition.
-- `src/data/contextFixture.ts`: deterministic fixture and display model.
+Photo: Alexander Migl (Alexander-93), [Volvo EX30 IMG 8923](https://commons.wikimedia.org/wiki/File:Volvo_EX30_IMG_8923.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). The local image is the 1280px Wikimedia thumbnail; the photo credit is also shown below the image.
 
-The existing backend contracts are documented in `../docs/integration.md`. A future adapter should map the authenticated API response into this UI model and use the existing consent/session routes. The fixture’s 15-minute expiry is demo-only; backend context and session expiry remain five minutes.
+## Integration
 
-This frontend captures no screenshots, runs no vision model, and performs no redaction. Screenshots staying local and intent-only sharing describe the intended pipeline. Banking balances and marketplace product details are synthetic.
+The fixture adapter is in src/data/contextFixture.ts. Replace its call in App.tsx with your local API when available. The context contract contains intent, confidence, signals, receivedAt and expiresAt (ISO timestamps). The app suggests a car loan only for a high-confidence car-buying intent with supporting signals and an unexpired timestamp. Unknown or uncertain context produces no suggestion. The suggested service follows the supplied POC catalogue's car-loan entry.
+
+All banking and context data are synthetic. This frontend does not capture screenshots or perform PII redaction. The privacy statement represents the intended local-service architecture; this demo verifies the UI flow only.

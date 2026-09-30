@@ -1,181 +1,166 @@
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import App, { assistReducer, initialState } from "./App";
-import {
-  CONTEXT_DELAY_MS,
-  CONTEXT_TTL_MS,
-  createContextFixture,
-} from "./data/contextFixture";
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import App, { assistReducer, initialState } from './App'
+import { CONTEXT_DELAY_MS, CONTEXT_TTL_MS, createContextFixture } from './data/contextFixture'
+import { NOTIFICATION_DELAY_MS } from './components/MarketplaceNotification'
 
-beforeEach(() => vi.useFakeTimers());
-afterEach(() => {
-  cleanup();
-  vi.useRealTimers();
-});
-const enable = () =>
-  fireEvent.click(screen.getByRole("switch", { name: "KBC Assist" }));
-const receive = () => act(() => vi.advanceTimersByTime(CONTEXT_DELAY_MS));
-const openContext = () =>
-  fireEvent.click(screen.getByRole("button", { name: "Context" }));
+beforeEach(() => vi.useFakeTimers())
+afterEach(() => { cleanup(); vi.useRealTimers() })
+const enable = () => fireEvent.click(screen.getByRole('switch', { name: 'KBC Assist' }))
+const receive = () => act(() => vi.advanceTimersByTime(CONTEXT_DELAY_MS))
+const openContext = () => fireEvent.click(screen.getByRole('button', { name: 'Context' }))
+const declineContext = () => fireEvent.click(screen.getByRole('button', { name: 'No, not now' }))
+const exploreContext = () => fireEvent.click(screen.getByRole('button', { name: 'Explore context' }))
 
-describe("Assist demo", () => {
-  it("keeps Assist in Context and preserves state across tabs", () => {
-    render(<App />);
-    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-    expect(screen.queryByText("Products")).not.toBeInTheDocument();
-    openContext();
-    enable();
-    receive();
-    fireEvent.click(screen.getByRole("button", { name: "Home" }));
-    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
-    expect(screen.getByText("€ 4,280.50")).toBeInTheDocument();
-    openContext();
-    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByText("Planning to buy a home?")).toBeInTheDocument();
-  });
-  it("starts paused, opts in explicitly, and loads a safe fixture", () => {
-    render(<App />);
-    openContext();
-    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
-    expect(screen.getByRole("status")).toHaveTextContent("Assist paused");
-    expect(
-      screen.queryByText("Planning to buy a home?"),
-    ).not.toBeInTheDocument();
-    enable();
-    expect(screen.getByRole("status")).toHaveTextContent("Waiting for context");
-    receive();
-    expect(screen.getByRole("status")).toHaveTextContent("Suggestion ready");
-    expect(screen.getByText("Planning to buy a home?")).toBeInTheDocument();
-    expect(screen.getByText("Viewed housing listings")).toBeInTheDocument();
-    expect(screen.getByText("Used a budget calculator")).toBeInTheDocument();
-    expect(screen.getByText("Expires (Belgian time)")).toBeInTheDocument();
-  });
-  it("opens checklist and explanation and restores keyboard focus", () => {
-    render(<App />);
-    openContext();
-    enable();
-    receive();
-    fireEvent.click(
-      screen.getByRole("button", { name: "View home-buying checklist" }),
-    );
-    expect(
-      screen.getByRole("heading", { name: "Home-buying checklist" }),
-    ).toBeInTheDocument();
-    expect(screen.getByText("Prepare the deposit")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "KBC Assist" }));
-    const whyButton = screen.getByRole("button", {
-      name: "Why am I seeing this?",
-    });
-    whyButton.focus();
-    fireEvent.click(whyButton);
-    const dialog = screen.getByRole("dialog");
-    expect(
-      within(dialog).getByText("Viewed housing listings"),
-    ).toBeInTheDocument();
-    const close = within(dialog).getByRole("button", {
-      name: "Close explanation",
-    });
-    expect(close).toHaveFocus();
-    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
-    expect(
-      within(dialog).getByRole("button", { name: "Got it" }),
-    ).toHaveFocus();
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(whyButton).toHaveFocus();
-  });
-  it("dismisses a suggestion but keeps context and the balance", () => {
-    render(<App />);
-    openContext();
-    enable();
-    receive();
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss suggestion" }));
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "No suggestion available yet",
-    );
-    expect(
-      screen.queryByText("Planning to buy a home?"),
-    ).not.toBeInTheDocument();
-    expect(screen.getByText("Context preview")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Home" }));
-    expect(screen.getByText("€ 4,280.50")).toBeInTheDocument();
-  });
-  it("pause cancels a pending request and a new opt-in restarts the demo", () => {
-    render(<App />);
-    openContext();
-    enable();
-    fireEvent.click(screen.getByRole("button", { name: "Pause" }));
-    receive();
-    expect(screen.getByRole("status")).toHaveTextContent("Assist paused");
-    expect(screen.queryByText("Context preview")).not.toBeInTheDocument();
-    enable();
-    receive();
-    expect(screen.getByText("Planning to buy a home?")).toBeInTheDocument();
-  });
-  it("delete cancels a pending request while retaining consent", () => {
-    render(<App />);
-    openContext();
-    enable();
-    fireEvent.click(screen.getByRole("button", { name: "Delete context" }));
-    receive();
-    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true");
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "No suggestion available yet",
-    );
-    expect(screen.queryByText("Context preview")).not.toBeInTheDocument();
-  });
-  it("deletes ready context, expires automatically, and resets on a new session", () => {
-    const { unmount } = render(<App />);
-    openContext();
-    enable();
-    receive();
-    fireEvent.click(screen.getByRole("button", { name: "Delete context" }));
-    expect(screen.queryByText("Context preview")).not.toBeInTheDocument();
-    enable();
-    enable();
-    receive();
-    act(() => vi.advanceTimersByTime(CONTEXT_TTL_MS));
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "No suggestion available yet",
-    );
-    expect(screen.queryByText("Context preview")).not.toBeInTheDocument();
-    unmount();
-    render(<App />);
-    openContext();
-    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "false");
-  });
-  it("does not infer a suggestion for uncertain or expired context", () => {
-    const state = assistReducer(initialState, { type: "enable" });
-    expect(
-      assistReducer(state, {
-        type: "receive",
-        context: { ...createContextFixture(), confidence: "low" },
-      }).status,
-    ).toBe("empty");
-    expect(
-      assistReducer(state, {
-        type: "receive",
-        context: { ...createContextFixture(), intent: "Unknown" },
-      }).status,
-    ).toBe("empty");
-    expect(
-      assistReducer(state, {
-        type: "receive",
-        context: createContextFixture(new Date(0)),
-      }).status,
-    ).toBe("empty");
-    expect(
-      assistReducer(initialState, {
-        type: "receive",
-        context: createContextFixture(),
-      }),
-    ).toEqual(initialState);
-  });
-});
+describe('Assist demo', () => {
+  it('shows a partner notification for a ready suggestion and opens KBC from its action', () => {
+    render(<App />); declineContext()
+    act(() => vi.advanceTimersByTime(CONTEXT_DELAY_MS + NOTIFICATION_DELAY_MS))
+    expect(screen.queryByText('Looking for a car? KBC can help.')).not.toBeInTheDocument()
+    openContext(); enable(); receive(); exploreContext()
+    expect(screen.queryByText('Looking for a car? KBC can help.')).not.toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(NOTIFICATION_DELAY_MS))
+    fireEvent.click(screen.getByRole('button', { name: /Take a look at our suggestions/ }))
+    expect(screen.getByRole('button', { name: 'Explore KBC car loan' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Context preview' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Looking for a car? KBC can help.')).not.toBeInTheDocument()
+  })
+  it('dismisses the notification independently and removes it when Assist is paused', () => {
+    render(<App />); declineContext(); openContext(); enable(); receive()
+    act(() => vi.advanceTimersByTime(NOTIFICATION_DELAY_MS))
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss KBC notification' }))
+    expect(screen.getByRole('button', { name: 'Explore KBC car loan' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' })); openContext()
+    expect(screen.queryByText('Looking for a car? KBC can help.')).not.toBeInTheDocument()
+    enable(); enable(); receive()
+    act(() => vi.advanceTimersByTime(NOTIFICATION_DELAY_MS))
+    expect(screen.getByText('Looking for a car? KBC can help.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }))
+    expect(screen.queryByText('Looking for a car? KBC can help.')).not.toBeInTheDocument()
+  })
+  it('opens the Vaul drawer on entry and enables context immediately after Yes', () => {
+    render(<App />)
+    expect(screen.getByRole('dialog', { name: 'Enable context?' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Yes, enable context' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    openContext()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('status')).toHaveTextContent('Waiting for context')
+    receive()
+    expect(screen.getByText('Looking for a car?')).toBeInTheDocument()
+  })
+  it('leaves context off when the drawer is dismissed with Escape', () => {
+    render(<App />)
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    receive(); openContext()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
+    expect(screen.queryByText('Looking for a car?')).not.toBeInTheDocument()
+  })
+  it('keeps Assist in Context and preserves state across tabs', () => {
+    render(<App />); declineContext()
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    expect(screen.queryByText('Products')).not.toBeInTheDocument()
+    openContext(); enable(); receive()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument()
+    expect(screen.getByText('€ 4,280.50')).toBeInTheDocument()
+    openContext()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByText('Looking for a car?')).toBeInTheDocument()
+  })
+  it('starts paused, opts in explicitly, and loads a safe fixture', () => {
+    render(<App />); declineContext()
+    openContext(); expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByRole('switch')).toBeEnabled()
+    expect(screen.getByRole('status')).toHaveTextContent('Assist paused')
+    expect(screen.queryByText('Looking for a car?')).not.toBeInTheDocument()
+    enable()
+    expect(screen.getByRole('status')).toHaveTextContent('Waiting for context')
+    receive()
+    expect(screen.getByRole('status')).toHaveTextContent('Suggestion ready')
+    expect(screen.getByText('Looking for a car?')).toBeInTheDocument()
+    expect(screen.queryByText('Context preview')).not.toBeInTheDocument()
+    exploreContext()
+    expect(screen.getByText('Viewed car listings')).toBeInTheDocument()
+    expect(screen.getByText('Compared electric cars')).toBeInTheDocument()
+    expect(screen.getByText('Expires (Belgian time)')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Context' }))
+    expect(screen.queryByText('Viewed car listings')).not.toBeInTheDocument()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+  })
+  it('opens the KBC service suggestion and explanation and restores keyboard focus', () => {
+    render(<App />); declineContext(); openContext(); enable(); receive()
+    fireEvent.click(screen.getByRole('button', { name: 'Explore KBC car loan' }))
+    expect(screen.getByRole('heading', { name: 'Car loan' })).toBeInTheDocument()
+    expect(screen.queryByText('Home-buying checklist')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close car loan preview' }))
+    expect(screen.queryByRole('heading', { name: 'Car loan' })).not.toBeInTheDocument()
+    const whyButton = screen.getByRole('button', { name: 'Why am I seeing this?' })
+    whyButton.focus(); fireEvent.click(whyButton)
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('Viewed car listings')).toBeInTheDocument()
+    const close = within(dialog).getByRole('button', { name: 'Close explanation' })
+    expect(close).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true })
+    expect(within(dialog).getByRole('button', { name: 'Got it' })).toHaveFocus()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(whyButton).toHaveFocus()
+  })
+  it('dismisses a suggestion but keeps context and the balance', () => {
+    render(<App />); declineContext(); openContext(); enable(); receive()
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss suggestion' }))
+    expect(screen.getByRole('status')).toHaveTextContent('No suggestion available yet')
+    expect(screen.queryByText('Looking for a car?')).not.toBeInTheDocument()
+    exploreContext()
+    expect(screen.getByRole('heading', { name: 'Context preview' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Home' }))
+    expect(screen.getByText('€ 4,280.50')).toBeInTheDocument()
+  })
+  it('pause cancels a pending request and a new opt-in restarts the demo', () => {
+    render(<App />); declineContext(); openContext(); enable()
+    fireEvent.click(screen.getByRole('button', { name: 'Pause' }))
+    receive()
+    expect(screen.getByRole('status')).toHaveTextContent('Assist paused')
+    expect(screen.queryByText('Context preview')).not.toBeInTheDocument()
+    enable(); receive()
+    expect(screen.getByText('Looking for a car?')).toBeInTheDocument()
+  })
+  it('delete cancels a pending request while retaining consent', () => {
+    render(<App />); declineContext(); openContext(); enable()
+    fireEvent.click(screen.getByRole('button', { name: 'Delete context' }))
+    receive()
+    expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('status')).toHaveTextContent('No suggestion available yet')
+    expect(screen.queryByText('Context preview')).not.toBeInTheDocument()
+  })
+  it('deletes ready context, expires automatically, and resets on a new session', () => {
+    const { unmount } = render(<App />); declineContext(); openContext(); enable(); receive()
+    fireEvent.click(screen.getByRole('button', { name: 'Delete context' }))
+    expect(screen.queryByText('Context preview')).not.toBeInTheDocument()
+    enable(); enable(); receive()
+    exploreContext()
+    act(() => vi.advanceTimersByTime(CONTEXT_TTL_MS))
+    expect(screen.queryByText('Viewed car listings')).not.toBeInTheDocument()
+    expect(screen.getByText(/No context to show yet/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Context' }))
+    expect(screen.getByRole('status')).toHaveTextContent('No suggestion available yet')
+    expect(screen.queryByText('Context preview')).not.toBeInTheDocument()
+    unmount(); render(<App />)
+    expect(screen.getByRole('dialog', { name: 'Enable context?' })).toBeInTheDocument()
+    declineContext()
+    openContext(); expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false')
+  })
+  it('does not infer a suggestion for uncertain or expired context', () => {
+    const state = assistReducer(initialState, { type: 'enable' })
+    expect(assistReducer(state, { type: 'receive', context: { ...createContextFixture(), confidence: 'low' } }).status).toBe('empty')
+    expect(assistReducer(state, { type: 'receive', context: { ...createContextFixture(), intent: 'Unknown' } }).status).toBe('empty')
+    expect(assistReducer(state, { type: 'receive', context: createContextFixture(new Date(0)) }).status).toBe('empty')
+    expect(assistReducer(initialState, { type: 'receive', context: createContextFixture() })).toEqual(initialState)
+  })
+})
+
+
+
+

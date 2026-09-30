@@ -1,0 +1,81 @@
+/* Keep the consent sheet inside the KBC phone. Vaul handles its motion. */
+.context-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: #102b4970;
+}
+.context-drawer {
+  position: absolute;
+  z-index: 21;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  padding: 14px 24px 25px;
+  border-radius: 24px 24px 0 0;
+  background: #fff;
+  color: #172b4d;
+  box-shadow: 0 -12px 35px #172b4d16;
+}
+.drawer-handle { margin: 0 auto 25px; background: #d6dce2; }
+.drawer-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 21px;
+  border-radius: 14px;
+  color: #005eb8;
+  background: #eef5fc;
+}
+.drawer-eyebrow { margin: 0 0 8px; color: #005eb8; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.drawer-title { margin: 0 0 13px; font-size: 28px; letter-spacing: -.04em; }
+.drawer-description { margin: 0; color: #617183; font-size: 13px; line-height: 1.65; }
+.drawer-example { display: flex; gap: 9px; align-items: center; margin: 22px 0 26px; color: #617183; font-size: 11px; line-height: 1.5; }
+.drawer-example svg { flex-shrink: 0; color: #7890a7; }
+.drawer-actions { display: grid; gap: 8px; }
+.drawer-primary, .drawer-secondary { width: 100%; min-height: 46px; border-radius: 9px; font-size: 13px; font-weight: 700; }
+.drawer-primary { color: #fff; background: #005eb8; }
+.drawer-primary:hover { background: #004f9b; }
+.drawer-secondary { color: #526579; background: #f3f5f7; }
+.drawer-secondary:hover { background: #e9eef3; }
+
+/* A quiet settings page: one switch, a suggestion, and a preview link. */
+.context-view { padding: 30px 24px 24px; background: #fff; }
+.context-heading { margin-bottom: 28px; }
+.context-heading h1 { font-size: 30px; font-weight: 600; }
+.context-setting { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 0 16px; border-top: 1px solid #edf0f3; }
+.context-setting h2 { margin: 0 0 6px; font-size: 16px; }
+.context-setting p { margin: 0; color: #738192; font-size: 12px; }
+.context-view .status-pill { margin-bottom: 23px; padding: 0; background: transparent; color: #738192; font-size: 10px; font-weight: 400; }
+.context-view .status-pill.ready { color: #287344; }
+.context-view .status-pill.waiting { color: #7e6a25; }
+.context-view .assist-optin, .context-view .empty-card { margin: 0 0 24px; padding: 8px 0; background: none; border: 0; border-radius: 0; }
+.context-view .assist-icon, .context-view .empty-icon { display: none; }
+.context-view .assist-copy h3, .context-view .empty-card h3 { font-size: 14px; font-weight: 500; }
+.context-view .suggestion-card { padding: 16px; margin-bottom: 24px; border: 0; border-radius: 12px; background: #f4f8fc; }
+.context-view .suggestion-card h3 { font-size: 21px; }
+.context-view .suggestion-actions { gap: 4px; }
+.context-view .primary-button { width: 100%; min-height: 42px; margin-top: 10px; border-radius: 8px; }
+.context-view .text-button { font-weight: 500; }
+.explore-context-button { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 19px 0; border-top: 1px solid #edf0f3; border-bottom: 1px solid #edf0f3; color: #005eb8; background: transparent; text-align: left; font-size: 13px; font-weight: 600; }
+.explore-context-button:hover { color: #003f7c; }
+.context-view .context-actions { margin-top: 14px; gap: 20px; }
+.context-view .context-actions button { min-height: 44px; padding: 0; background: transparent; border: 0; font-size: 11px; font-weight: 500; }
+.context-view .context-actions button:disabled { opacity: .4; cursor: default; }
+.preview-page-heading { margin: 30px 0 24px; }
+.context-preview-page .context-preview { padding: 0; border: 0; border-radius: 0; }
+.context-preview h2 { margin: 0; font-size: 15px; }
+.context-preview-page .context-grid { gap: 20px; margin-top: 25px; }
+.context-empty-preview { color: #738192; font-size: 13px; line-height: 1.6; }
+.car-photo { margin: 0 0 16px; }
+.car-photo .car-image-card { margin-bottom: 6px; }
+.car-photo img { height: auto; aspect-ratio: 1280 / 736; object-fit: cover; }
+.car-photo figcaption { color: #856c58; font-size: 8px; line-height: 1.5; }
+.car-photo figcaption a { color: inherit; text-underline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .context-drawer[data-vaul-drawer], .context-drawer-overlay[data-vaul-overlay] { animation: none !important; transition: none !important; }
+}
+.service-preview{display:flex;justify-content:space-between;gap:12px;margin-top:13px;padding:13px;border:1px solid #d9e1e9;border-radius:8px;background:#fff}.service-preview h4{margin:2px 0 4px;font-size:14px}.service-preview p{margin:0;color:#687b90;font-size:11px;line-height:1.45}.service-close{align-self:flex-start;display:grid;place-items:center;width:28px;height:28px;border-radius:6px;color:#687b90;background:#f3f5f7}
