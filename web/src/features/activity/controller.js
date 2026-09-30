@@ -89,6 +89,7 @@ export function mountActivity(root) {
       );
     } else if (event.status === "discarded") {
       clearPreview();
+      clearCaptureProof();
       $("status").textContent = captureActive
         ? "Live · frame discarded"
         : "Frame discarded";
